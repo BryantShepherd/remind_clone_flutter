@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remind_clone_flutter/routes.dart';
+import 'package:remind_clone_flutter/ui/home/home.dart';
 
 void main() {
   runApp(RemindClone());
@@ -10,9 +11,7 @@ class RemindClone extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Remind Clone",
-      home: Center(
-        child: Text("Hello World"),
-      ),
+      home: HomeScreen(),
       routes: Routes.routes,
     );
   }
