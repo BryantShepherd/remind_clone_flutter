@@ -11,7 +11,7 @@ class RemindClone extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Remind Clone",
-      home: HomeScreen(),
+      initialRoute: "/login",
       routes: Routes.routes,
     );
   }
