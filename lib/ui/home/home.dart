@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'widgets/home_tab_message.dart';
 
 enum MenuActions { account, logOut }
 
@@ -10,9 +11,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   final Map<String, Widget> tabs = {
-    "Messages": Center(
-      child: Text("Message"),
-    ),
+    "Messages": MessageTab(),
     "Files": Center(
       child: Text("Files"),
     ),
