@@ -89,9 +89,15 @@ class MessageTextBox extends StatelessWidget {
   const MessageTextBox({
     Key key,
     @required this.messageInputController,
+    this.onSend,
+    this.onOpenCamera,
+    this.onOpenFileUpload,
   }) : super(key: key);
 
   final TextEditingController messageInputController;
+  final VoidCallback onSend;
+  final VoidCallback onOpenCamera;
+  final VoidCallback onOpenFileUpload;
 
   @override
   Widget build(BuildContext context) {
@@ -119,15 +125,26 @@ class MessageTextBox extends StatelessWidget {
           ),
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: Icon(Icons.file_upload),
-              onPressed: () {},
-              splashRadius: 15.0,
+              icon: Icon(
+                Icons.file_upload,
+              ),
+              onPressed: onOpenFileUpload,
+              splashRadius: 17.0,
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.camera_alt,
+              ),
+              onPressed: onOpenCamera,
+              splashRadius: 17.0,
+            ),
+            Expanded(
+              child: SizedBox(),
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: onSend,
               child: Text("SEND"),
             ),
           ],
