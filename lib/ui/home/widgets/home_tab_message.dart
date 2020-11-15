@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bubble/bubble.dart';
 
 class MessageTab extends StatelessWidget {
   @override
@@ -64,52 +65,74 @@ class _ConversationScreenState extends State<ConversationScreen> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: ListView(
                 children: [
                   MessageBubble(
                     content:
-                        "Iusto voluptatem consequatur delectus fugit non quia delectus atque. Nemo aliquid molestias reiciendis quaerat. Explicabo at quia repudiandae sit et qui. Repellendus dolorum cumque esse vero. Voluptatem eveniet enim libero. In possimus ratione magni provident sit suscipit expedita consectetur.",
+                        "An Ox came down to a reedy pool to drink. As he splashed heavily into the water, he crushed a young Frog into the mud.",
                   ),
                 ],
               ),
             ),
-            Container(
-              height: 100.0,
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(color: Colors.grey, width: 2),
-                ),
-              ),
-              child: TextField(
-                style: TextStyle(
-                  color: Colors.black,
-                ),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[500],
-                  icon: Icon(
-                    Icons.location_city,
-                    color: Colors.white,
-                  ),
-                  hintText: "Enter City Name",
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10.0),
-                    ),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                controller: this.messageInputController,
-              ),
-            ),
+            MessageTextBox(messageInputController: messageInputController),
           ],
         ),
       ),
+    );
+  }
+}
+
+class MessageTextBox extends StatelessWidget {
+  const MessageTextBox({
+    Key key,
+    @required this.messageInputController,
+  }) : super(key: key);
+
+  final TextEditingController messageInputController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          child: TextField(
+            style: TextStyle(
+              color: Colors.black,
+            ),
+            decoration: InputDecoration(
+              filled: true,
+              hintText: "Send Message...",
+              hintStyle: TextStyle(
+                color: Colors.grey,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            controller: this.messageInputController,
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: Icon(Icons.file_upload),
+              onPressed: () {},
+              splashRadius: 15.0,
+            ),
+            TextButton(
+              onPressed: () {},
+              child: Text("SEND"),
+            ),
+          ],
+        )
+      ],
     );
   }
 }
@@ -119,6 +142,25 @@ class MessageBubble extends StatelessWidget {
   final String content;
   final String createdAt;
   final String avatarUrl;
+  final bool isMine = false;
+
+  final CircleAvatar userAvatar = CircleAvatar(
+    backgroundColor: Colors.black12,
+    child: Icon(
+      Icons.group,
+      color: Colors.black,
+    ),
+  );
+
+  final myMessageStyle = BubbleStyle(
+    nip: BubbleNip.rightBottom,
+    alignment: Alignment.bottomRight,
+  );
+
+  final otherMessageStyle = BubbleStyle(
+    nip: BubbleNip.leftBottom,
+    alignment: Alignment.bottomLeft,
+  );
 
   MessageBubble(
       {this.avatarUrl, this.senderName, this.content, this.createdAt});
@@ -128,23 +170,15 @@ class MessageBubble extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        CircleAvatar(
-          backgroundColor: Colors.black12,
-          child: Icon(
-            Icons.group,
-            color: Colors.black,
-          ),
-        ),
+        userAvatar,
         SizedBox(
           width: 10.0,
         ),
         Expanded(
-          child: Container(
-            padding: EdgeInsets.all(10.0),
+          child: Bubble(
             child: Text(this.content),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-            ),
+            padding: BubbleEdges.all(12.0),
+            style: isMine ? myMessageStyle : otherMessageStyle,
           ),
         ),
       ],
