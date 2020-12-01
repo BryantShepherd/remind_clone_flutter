@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'widgets/home_tab_message.dart';
+import 'widgets/home_tab_file.dart';
 
 enum MenuActions { account, logOut }
 
@@ -12,9 +13,7 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   final Map<String, Widget> tabs = {
     "Messages": MessageTab(),
-    "Files": Center(
-      child: Text("Files"),
-    ),
+    "Files": FileTab(),
     "People": Center(
       child: Text("People"),
     ),
