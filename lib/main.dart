@@ -12,7 +12,7 @@ class RemindClone extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => UserModel()),
+        ChangeNotifierProvider(create: (context) => UserStore()),
       ],
       child: MaterialApp(
         title: "Remind Clone",

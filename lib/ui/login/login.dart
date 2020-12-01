@@ -22,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userModel = Provider.of<UserModel>(context, listen: false);
+    final userStore = Provider.of<UserStore>(context, listen: false);
 
     return Scaffold(
       body: SafeArea(
@@ -67,8 +67,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     try {
                       String email = this._emailController.text;
                       String password = this._passwordController.text;
-                      print(userModel);
-                      print(await userModel.fetchUser(email, password));
+                      await userStore.login(email, password);
+                      print(userStore.getUser().name);
                       Navigator.pushNamed(
                         context,
                         Routes.home,

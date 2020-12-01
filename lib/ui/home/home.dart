@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'widgets/home_tab_message.dart';
+import 'package:provider/provider.dart';
 
 enum MenuActions { account, logOut }
 
@@ -107,12 +109,17 @@ class _HomeScreenState extends State<HomeScreen>
         children: [
           DrawerHeader(
             child: Center(
-              child: Text(
-                "Mị Nương",
-                style: Theme.of(context).textTheme.headline5.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
+              child: Consumer<UserStore>(
+                builder: (context, store, child) {
+                  String userName = store.getUser().name;
+                  return Text(
+                    userName,
+                    style: Theme.of(context).textTheme.headline5.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                  );
+                },
               ),
             ),
             decoration: BoxDecoration(
