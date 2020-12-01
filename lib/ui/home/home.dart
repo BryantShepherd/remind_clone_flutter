@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:remind_clone_flutter/ui/class/class_create.dart';
+import 'package:remind_clone_flutter/ui/class/class_join.dart';
+import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
 import 'widgets/home_tab_message.dart';
 
 enum MenuActions { account, logOut }
@@ -18,9 +21,7 @@ class _HomeScreenState extends State<HomeScreen>
     "People": Center(
       child: Text("People"),
     ),
-    "Settings": Center(
-      child: Text("Settings"),
-    ),
+    "Settings": SettingsTab(),
   };
 
   TabController _tabController;
@@ -121,13 +122,25 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           ListTile(
             leading: Icon(Icons.one_k),
-            title: Text('Item 1'),
-            onTap: () {},
+            title: Text('Join class'),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ClassJoin(),
+                ),
+              );
+            },
           ),
           ListTile(
             leading: Icon(Icons.two_k),
-            title: Text('item 2'),
-            onTap: () {},
+            title: Text('Create class'),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ClassCreate(),
+                ),
+              );
+            },
           ),
         ],
       ),
