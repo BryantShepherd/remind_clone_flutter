@@ -121,7 +121,10 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
           ListTile(
-            leading: Icon(Icons.one_k),
+            leading: Icon(
+              Icons.add_circle_outline,
+              size: 35.0,
+            ),
             title: Text('Join class'),
             onTap: () {
               Navigator.of(context).push(
@@ -132,7 +135,10 @@ class _HomeScreenState extends State<HomeScreen>
             },
           ),
           ListTile(
-            leading: Icon(Icons.two_k),
+            leading: Icon(
+              Icons.add_circle_outline,
+              size: 35.0,
+            ),
             title: Text('Create class'),
             onTap: () {
               Navigator.of(context).push(
