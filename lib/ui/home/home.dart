@@ -66,21 +66,33 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           PopupMenuButton<MenuActions>(
             onSelected: (result) {
-              if (result == MenuActions.logOut) {
-                Navigator.pop(context);
+              switch(result) {
+                case MenuActions.account: {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => UserSettings())
+                  );
+                }
+                break;
+                case MenuActions.logOut: {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => UserSettings())
+                  );
+                }
+                break;
               }
             },
             itemBuilder: (BuildContext context) {
               return <PopupMenuEntry<MenuActions>>[
                 const PopupMenuItem(
-                  child: Text("Select me!"),
+                  value: MenuActions.account,
+                  child: Text("Account settings"),
                 ),
                 const PopupMenuItem(
                   child: Text("Select me!"),
                 ),
                 const PopupMenuItem(
                   value: MenuActions.logOut,
-                  child: Text("Get me out!"),
+                  child: Text("Log out!"),
                 ),
               ];
             },
