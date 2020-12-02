@@ -19,6 +19,10 @@ class UserStore with ChangeNotifier {
     return this.user;
   }
 
+  String getToken() {
+    return this.token;
+  }
+
   Future<void> login(String email, String password) async {
     RestClient client = new RestClient();
     UserApi userApi = new UserApi(client);

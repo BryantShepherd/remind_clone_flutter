@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/routes.dart';
 
@@ -23,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final userStore = Provider.of<UserStore>(context, listen: false);
+    final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
 
     return Scaffold(
       body: SafeArea(
@@ -68,7 +70,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       String email = this._emailController.text;
                       String password = this._passwordController.text;
                       await userStore.login(email, password);
+                      await classroomStore
+                          .fetchUserClassrooms(userStore.getToken());
                       print(userStore.getUser().name);
+                      print(classroomStore.getJoinedClassrooms());
                       Navigator.pushNamed(
                         context,
                         Routes.home,

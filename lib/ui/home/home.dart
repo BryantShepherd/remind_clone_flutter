@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:remind_clone_flutter/models/classroom.dart';
 import 'widgets/home_tab_message.dart';
 import 'package:provider/provider.dart';
 
@@ -104,6 +106,26 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Drawer buildDrawer(BuildContext context) {
+    var classroomStore = Provider.of<ClassroomStore>(context);
+    var joinedClassrooms = classroomStore.getJoinedClassrooms();
+    var ownedClassrooms = classroomStore.getOwnedClassrooms();
+
+    List<ListTile> joinedClassroomTiles = [];
+    for (Classroom classroom in joinedClassrooms) {
+      joinedClassroomTiles.add(ListTile(
+        title: Text(classroom.name),
+        onTap: () {},
+      ));
+    }
+
+    List<ListTile> ownedClassroomTiles = [];
+    for (Classroom classroom in ownedClassrooms) {
+      ownedClassroomTiles.add(ListTile(
+        title: Text(classroom.name),
+        onTap: () {},
+      ));
+    }
+
     return Drawer(
       child: ListView(
         children: [
@@ -126,16 +148,8 @@ class _HomeScreenState extends State<HomeScreen>
               color: Colors.blue,
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.one_k),
-            title: Text('Item 1'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: Icon(Icons.two_k),
-            title: Text('item 2'),
-            onTap: () {},
-          ),
+          ...joinedClassroomTiles,
+          ...ownedClassroomTiles,
         ],
       ),
     );

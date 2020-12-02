@@ -10,7 +10,7 @@ class RestClient {
   final JsonDecoder _decoder = JsonDecoder();
 
   // Get:-----------------------------------------------------------------------
-  Future<dynamic> get(String url, {Map headers}) {
+  Future<dynamic> get(String url, {Map<String, String> headers}) {
     return http.get(url, headers: headers).then((http.Response response) {
       final String res = response.body;
       final int statusCode = response.statusCode;
@@ -30,7 +30,7 @@ class RestClient {
   }
 
   // Post:----------------------------------------------------------------------
-  Future<dynamic> post(String url, {Map headers, body, encoding}) {
+  Future<dynamic> post(String url, {Map<String, String> headers, body, encoding}) {
     return http
         .post(url, body: body, headers: headers, encoding: encoding)
         .then((http.Response response) {
@@ -48,5 +48,12 @@ class RestClient {
       print(res);
       return _decoder.convert(res);
     });
+  }
+
+  Future<dynamic> getWithBearerToken(String url, String token) {
+    return this.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
   }
 }
