@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:remind_clone_flutter/ui/class/class_create.dart';
 import 'package:remind_clone_flutter/ui/class/class_join.dart';
 import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
+import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'widgets/home_tab_message.dart';
 
 enum MenuActions { account, logOut }
@@ -107,49 +108,130 @@ class _HomeScreenState extends State<HomeScreen>
       child: ListView(
         children: [
           DrawerHeader(
-            child: Center(
-              child: Text(
-                "Mị Nương",
-                style: Theme.of(context).textTheme.headline5.copyWith(
-                      fontWeight: FontWeight.w500,
+            child: Column(
+              children: [
+                IconButton(
+                    icon: Icon(
+                      Icons.account_circle,
                       color: Colors.white,
                     ),
-              ),
+                    iconSize: 80.0,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => UserSettings(),
+                        ),
+                      );
+                    }),
+                Text(
+                  "Koro",
+                  style: Theme.of(context).textTheme.headline5.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                ),
+              ],
             ),
             decoration: BoxDecoration(
               color: Colors.blue,
             ),
           ),
-          ListTile(
-            leading: Icon(
-              Icons.add_circle_outline,
-              size: 35.0,
-            ),
-            title: Text('Join class'),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ClassJoin(),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(
-              Icons.add_circle_outline,
-              size: 35.0,
-            ),
-            title: Text('Create class'),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ClassCreate(),
-                ),
-              );
-            },
-          ),
+          Joined(),
+          Owned(),
         ],
       ),
+    );
+  }
+}
+
+class Joined extends StatefulWidget {
+  @override
+  _JoinedState createState() => _JoinedState();
+}
+
+class _JoinedState extends State<Joined> {
+  final List<Map<String, dynamic>> _joined = [
+    {"name": "Web Development"},
+    {"name": "Mobile Development"},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text("Joined"),
+        ),
+        ListTile(
+          leading: Icon(
+            Icons.add_circle_outline,
+            size: 35.0,
+          ),
+          title: Text('Join class'),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ClassCreate(),
+              ),
+            );
+          },
+        ),
+        for (int i = 0; i < _joined.length; i++)
+          ListTile(
+            leading: Icon(
+              Icons.account_circle,
+              size: 35.0,
+            ),
+            title: Text(_joined[i]["name"]),
+            onTap: () {},
+          ),
+      ],
+    );
+  }
+}
+
+class Owned extends StatefulWidget {
+  @override
+  _OwnedState createState() => _OwnedState();
+}
+
+class _OwnedState extends State<Owned> {
+  final List<Map<String, dynamic>> _owned = [
+    {"name": "Web Development"},
+    {"name": "Mobile Development"},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text("Owned"),
+        ),
+        ListTile(
+          leading: Icon(
+            Icons.add_circle_outline,
+            size: 35.0,
+          ),
+          title: Text('Create class'),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => ClassCreate(),
+              ),
+            );
+          },
+        ),
+        for (int i = 0; i < _owned.length; i++)
+          ListTile(
+            leading: Icon(
+              Icons.account_circle,
+              size: 35.0,
+            ),
+            title: Text(_owned[i]["name"]),
+            onTap: () {},
+          ),
+      ],
     );
   }
 }

@@ -157,7 +157,10 @@ class SettingsTab extends StatelessWidget {
 }
 
 class ClassOwner extends StatelessWidget {
-  final List<String> nameList = new List<String>();
+  final List<Map<String, dynamic>> _owner = [
+    {"name": "Haipro"},
+    {"name": "Tuna Ahn"},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -184,14 +187,14 @@ class ClassOwner extends StatelessWidget {
             ),
             onTap: () {},
           ),
-          for (int index = 1; index < 5; index++)
+          for (int i = 0; i < _owner.length; i++)
             ListTile(
               leading: ExcludeSemantics(
                 child: CircleAvatar(
-                  child: Text('$index'),
+                  child: Text('${i + 1}'),
                 ),
               ),
-              title: Text("Haipro"),
+              title: Text(_owner[i]["name"]),
             ),
         ],
       ),
