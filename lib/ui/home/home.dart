@@ -4,6 +4,8 @@ import 'package:remind_clone_flutter/ui/class/class_join.dart';
 import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
 import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'widgets/home_tab_message.dart';
+import 'widgets/home_tab_file.dart';
+import 'package:remind_clone_flutter/widgets/submenu_fab.dart';
 
 enum MenuActions { account, logOut }
 
@@ -16,9 +18,7 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   final Map<String, Widget> tabs = {
     "Messages": MessageTab(),
-    "Files": Center(
-      child: Text("Files"),
-    ),
+    "Files": FileTab(),
     "People": Center(
       child: Text("People"),
     ),
@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen>
   };
 
   TabController _tabController;
+  int _selectedTabIndex = 0;
 
   @override
   void initState() {
@@ -53,6 +54,11 @@ class _HomeScreenState extends State<HomeScreen>
                 text: tabLabel,
               )
           ],
+          onTap: (tabIndex) {
+            setState(() {
+              this._selectedTabIndex = tabIndex;
+            });
+          },
         ),
         actions: <Widget>[
           IconButton(
@@ -104,15 +110,29 @@ class _HomeScreenState extends State<HomeScreen>
         children: <Widget>[for (final tab in this.tabs.values) tab],
       ),
       drawer: buildDrawer(context),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.create,
-        ),
-        onPressed: () {
-          print(this._tabController.index);
-        },
-      ),
+      floatingActionButton: this._buildFab(),
     );
+  }
+
+  Widget _buildFab() {
+    switch (this._selectedTabIndex) {
+      case 0:
+        return SubmenuFab(
+          icons: [Icons.sms, Icons.mail],
+          mainIcon: Icons.create,
+          pressHandlers: [
+            () {
+              print("hello");
+            },
+            () {
+              print("hi me");
+            },
+          ],
+        );
+        break;
+      default:
+        return null;
+    }
   }
 
   Drawer buildDrawer(BuildContext context) {
