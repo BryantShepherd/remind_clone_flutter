@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'widgets/home_tab_message.dart';
 import 'widgets/home_tab_file.dart';
+import 'package:remind_clone_flutter/widgets/submenu_fab.dart';
 
 enum MenuActions { account, logOut }
 
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen>
   };
 
   TabController _tabController;
+  int _selectedTabIndex = 0;
 
   @override
   void initState() {
@@ -50,6 +52,11 @@ class _HomeScreenState extends State<HomeScreen>
                 text: tabLabel,
               )
           ],
+          onTap: (tabIndex) {
+            setState(() {
+              this._selectedTabIndex = tabIndex;
+            });
+          },
         ),
         actions: <Widget>[
           IconButton(
@@ -89,15 +96,29 @@ class _HomeScreenState extends State<HomeScreen>
         children: <Widget>[for (final tab in this.tabs.values) tab],
       ),
       drawer: buildDrawer(context),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.create,
-        ),
-        onPressed: () {
-          print(this._tabController.index);
-        },
-      ),
+      floatingActionButton: this._buildFab(),
     );
+  }
+
+  Widget _buildFab() {
+    switch (this._selectedTabIndex) {
+      case 0:
+        return SubmenuFab(
+          icons: [Icons.sms, Icons.mail],
+          mainIcon: Icons.create,
+          pressHandlers: [
+            () {
+              print("hello");
+            },
+            () {
+              print("hi me");
+            },
+          ],
+        );
+        break;
+      default:
+        return null;
+    }
   }
 
   Drawer buildDrawer(BuildContext context) {
