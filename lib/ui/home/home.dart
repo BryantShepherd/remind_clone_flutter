@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
+import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:remind_clone_flutter/models/classroom.dart';
 import 'widgets/home_tab_message.dart';
+import 'package:provider/provider.dart';
 import 'widgets/home_tab_file.dart';
 import 'package:remind_clone_flutter/widgets/submenu_fab.dart';
 
@@ -116,39 +120,64 @@ class _HomeScreenState extends State<HomeScreen>
           ],
         );
         break;
+      case 1:
+        return FloatingActionButton(
+          onPressed: () {
+            print("Upload File");
+          },
+          child: Icon(Icons.file_upload),
+        );
+        break;
       default:
         return null;
     }
   }
 
   Drawer buildDrawer(BuildContext context) {
+    var classroomStore = Provider.of<ClassroomStore>(context);
+    var joinedClassrooms = classroomStore.getJoinedClassrooms();
+    var ownedClassrooms = classroomStore.getOwnedClassrooms();
+
+    List<ListTile> joinedClassroomTiles = [];
+    for (Classroom classroom in joinedClassrooms) {
+      joinedClassroomTiles.add(ListTile(
+        title: Text(classroom.name),
+        onTap: () {},
+      ));
+    }
+
+    List<ListTile> ownedClassroomTiles = [];
+    for (Classroom classroom in ownedClassrooms) {
+      ownedClassroomTiles.add(ListTile(
+        title: Text(classroom.name),
+        onTap: () {},
+      ));
+    }
+
     return Drawer(
       child: ListView(
         children: [
           DrawerHeader(
             child: Center(
-              child: Text(
-                "Mị Nương",
-                style: Theme.of(context).textTheme.headline5.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
+              child: Consumer<UserStore>(
+                builder: (context, store, child) {
+                  String userName = store.getUser().name;
+                  return Text(
+                    userName,
+                    style: Theme.of(context).textTheme.headline5.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                  );
+                },
               ),
             ),
             decoration: BoxDecoration(
               color: Colors.blue,
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.one_k),
-            title: Text('Item 1'),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: Icon(Icons.two_k),
-            title: Text('item 2'),
-            onTap: () {},
-          ),
+          ...joinedClassroomTiles,
+          ...ownedClassroomTiles,
         ],
       ),
     );
