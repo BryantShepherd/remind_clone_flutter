@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
+import 'package:remind_clone_flutter/models/classroom.dart';
 
 class FileTab extends StatefulWidget {
   @override
@@ -6,28 +9,58 @@ class FileTab extends StatefulWidget {
 }
 
 class _FileTabState extends State<FileTab> {
+  Future<void> futureFetchFiles;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // TODO: do people put Provider.of in here? :/ No time to ponder that question, though.
+    futureFetchFiles =
+        Provider.of<ClassroomStore>(context).fetchClassroomFiles("", 1);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: <_FileListTile>[
-        _FileListTile(
-          fileName: "computer_architecture.pdf",
-          fileSize: "30.04 MB",
-        ),
-      ],
+    return FutureBuilder(
+      future: futureFetchFiles,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<_FileListTile> children = [];
+
+          for (var file in snapshot.data) {
+            children.add(
+              _FileListTile(
+                file: file,
+              ),
+            );
+          }
+          return ListView(
+            children: children,
+          );
+        } else if (snapshot.hasError) {
+          // TODO: show error dialog here.
+          return Text("${snapshot.error}");
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }
 
 class _FileListTile extends StatelessWidget {
   final IconData leadingIconData;
-  final String fileName;
-  final String fileSize;
+  final ClassroomFile file;
 
   _FileListTile({
     this.leadingIconData = Icons.insert_drive_file,
-    @required this.fileName,
-    @required this.fileSize,
+    @required this.file,
   });
 
   @override
@@ -40,15 +73,15 @@ class _FileListTile extends StatelessWidget {
           color: Colors.black,
         ),
       ),
-      title: Text(this.fileName),
+      title: Text(this.file.name),
       subtitle: Text(
-        fileSize,
+        this.file.size.toString(),
         overflow: TextOverflow.ellipsis,
       ),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => _FileDetailScreen(),
+            builder: (context) => _FileDetailScreen(this.file),
           ),
         );
       },
@@ -57,6 +90,10 @@ class _FileListTile extends StatelessWidget {
 }
 
 class _FileDetailScreen extends StatelessWidget {
+  final ClassroomFile file;
+
+  _FileDetailScreen(this.file);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,13 +103,9 @@ class _FileDetailScreen extends StatelessWidget {
         children: [
           Column(
             children: [
-              Icon(
-                Icons.insert_drive_file,
-                size: 40.0,
-                color: Colors.blueGrey
-              ),
+              Icon(Icons.insert_drive_file, size: 40.0, color: Colors.blueGrey),
               Text(
-                "file.pdf",
+                this.file.name,
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 20.0,
@@ -97,7 +130,7 @@ class _FileDetailScreen extends StatelessWidget {
                     height: 10.0,
                   ),
                   Text(
-                    "12/10/2020",
+                    this.file.createdAt,
                     style: TextStyle(fontSize: 15.0),
                   ),
                   SizedBox(

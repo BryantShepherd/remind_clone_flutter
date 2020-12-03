@@ -120,6 +120,14 @@ class _HomeScreenState extends State<HomeScreen>
           ],
         );
         break;
+      case 1:
+        return FloatingActionButton(
+          onPressed: () {
+            print("Upload File");
+          },
+          child: Icon(Icons.file_upload),
+        );
+        break;
       default:
         return null;
     }
