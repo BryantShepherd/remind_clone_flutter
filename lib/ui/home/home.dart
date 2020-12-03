@@ -76,17 +76,18 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           PopupMenuButton<MenuActions>(
             onSelected: (result) {
-              switch(result) {
-                case MenuActions.account: {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => UserSettings())
-                  );
-                }
-                break;
-                case MenuActions.logOut: {
-                  Navigator.pop(context);
-                }
-                break;
+              switch (result) {
+                case MenuActions.account:
+                  {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => UserSettings()));
+                  }
+                  break;
+                case MenuActions.logOut:
+                  {
+                    Navigator.pop(context);
+                  }
+                  break;
               }
             },
             itemBuilder: (BuildContext context) {
@@ -142,17 +143,61 @@ class _HomeScreenState extends State<HomeScreen>
     var joinedClassrooms = classroomStore.getJoinedClassrooms();
     var ownedClassrooms = classroomStore.getOwnedClassrooms();
 
-    List<ListTile> joinedClassroomTiles = [];
+    List<ListTile> joinedClassroomTiles = [
+      ListTile(
+        title: Text("Joined"),
+      ),
+      ListTile(
+        leading: Icon(
+          Icons.add_circle_outline,
+          size: 35.0,
+        ),
+        title: Text('Join class'),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ClassCreate(),
+            ),
+          );
+        },
+      ),
+    ];
     for (Classroom classroom in joinedClassrooms) {
       joinedClassroomTiles.add(ListTile(
+        leading: Icon(
+          Icons.account_circle,
+          size: 35.0,
+        ),
         title: Text(classroom.name),
         onTap: () {},
       ));
     }
 
-    List<ListTile> ownedClassroomTiles = [];
+    List<ListTile> ownedClassroomTiles = [
+      ListTile(
+        title: Text("Created"),
+      ),
+      ListTile(
+        leading: Icon(
+          Icons.add_circle_outline,
+          size: 35.0,
+        ),
+        title: Text('Create class'),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ClassCreate(),
+            ),
+          );
+        },
+      ),
+    ];
     for (Classroom classroom in ownedClassrooms) {
       ownedClassroomTiles.add(ListTile(
+        leading: Icon(
+          Icons.account_circle,
+          size: 35.0,
+        ),
         title: Text(classroom.name),
         onTap: () {},
       ));
@@ -183,9 +228,9 @@ class _HomeScreenState extends State<HomeScreen>
                     return Text(
                       userName,
                       style: Theme.of(context).textTheme.headline5.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
                     );
                   },
                 ),
@@ -197,102 +242,8 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           ...joinedClassroomTiles,
           ...ownedClassroomTiles,
-          Joined(),
-          Owned(),
         ],
       ),
-    );
-  }
-}
-
-class Joined extends StatefulWidget {
-  @override
-  _JoinedState createState() => _JoinedState();
-}
-
-class _JoinedState extends State<Joined> {
-  final List<Map<String, dynamic>> _joined = [
-    {"name": "Web Development"},
-    {"name": "Mobile Development"},
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListTile(
-          title: Text("Joined"),
-        ),
-        ListTile(
-          leading: Icon(
-            Icons.add_circle_outline,
-            size: 35.0,
-          ),
-          title: Text('Join class'),
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => ClassCreate(),
-              ),
-            );
-          },
-        ),
-        for (int i = 0; i < _joined.length; i++)
-          ListTile(
-            leading: Icon(
-              Icons.account_circle,
-              size: 35.0,
-            ),
-            title: Text(_joined[i]["name"]),
-            onTap: () {},
-          ),
-      ],
-    );
-  }
-}
-
-class Owned extends StatefulWidget {
-  @override
-  _OwnedState createState() => _OwnedState();
-}
-
-class _OwnedState extends State<Owned> {
-  final List<Map<String, dynamic>> _owned = [
-    {"name": "Web Development"},
-    {"name": "Mobile Development"},
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ListTile(
-          title: Text("Owned"),
-        ),
-        ListTile(
-          leading: Icon(
-            Icons.add_circle_outline,
-            size: 35.0,
-          ),
-          title: Text('Create class'),
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => ClassCreate(),
-              ),
-            );
-          },
-        ),
-        for (int i = 0; i < _owned.length; i++)
-          ListTile(
-            leading: Icon(
-              Icons.account_circle,
-              size: 35.0,
-            ),
-            title: Text(_owned[i]["name"]),
-            onTap: () {},
-          ),
-      ],
     );
   }
 }
