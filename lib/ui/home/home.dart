@@ -3,9 +3,13 @@ import 'package:remind_clone_flutter/ui/class/class_create.dart';
 import 'package:remind_clone_flutter/ui/class/class_join.dart';
 import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
 import 'package:remind_clone_flutter/ui/user/user_settings.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
+import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:remind_clone_flutter/models/classroom.dart';
 import 'widgets/home_tab_message.dart';
 import 'widgets/home_tab_file.dart';
 import 'package:remind_clone_flutter/widgets/submenu_fab.dart';
+import 'package:provider/provider.dart';
 
 enum MenuActions { account, logOut }
 
@@ -80,9 +84,7 @@ class _HomeScreenState extends State<HomeScreen>
                 }
                 break;
                 case MenuActions.logOut: {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => UserSettings())
-                  );
+                  Navigator.pop(context);
                 }
                 break;
               }
@@ -136,6 +138,26 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Drawer buildDrawer(BuildContext context) {
+    var classroomStore = Provider.of<ClassroomStore>(context);
+    var joinedClassrooms = classroomStore.getJoinedClassrooms();
+    var ownedClassrooms = classroomStore.getOwnedClassrooms();
+
+    List<ListTile> joinedClassroomTiles = [];
+    for (Classroom classroom in joinedClassrooms) {
+      joinedClassroomTiles.add(ListTile(
+        title: Text(classroom.name),
+        onTap: () {},
+      ));
+    }
+
+    List<ListTile> ownedClassroomTiles = [];
+    for (Classroom classroom in ownedClassrooms) {
+      ownedClassroomTiles.add(ListTile(
+        title: Text(classroom.name),
+        onTap: () {},
+      ));
+    }
+
     return Drawer(
       child: ListView(
         children: [
@@ -155,12 +177,17 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       );
                     }),
-                Text(
-                  "Koro",
-                  style: Theme.of(context).textTheme.headline5.copyWith(
+                Consumer<UserStore>(
+                  builder: (context, store, child) {
+                    String userName = store.getUser().name;
+                    return Text(
+                      userName,
+                      style: Theme.of(context).textTheme.headline5.copyWith(
                         fontWeight: FontWeight.w500,
                         color: Colors.white,
                       ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -168,6 +195,8 @@ class _HomeScreenState extends State<HomeScreen>
               color: Colors.blue,
             ),
           ),
+          ...joinedClassroomTiles,
+          ...ownedClassroomTiles,
           Joined(),
           Owned(),
         ],
