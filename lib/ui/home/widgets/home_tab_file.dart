@@ -19,9 +19,11 @@ class _FileTabState extends State<FileTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final classroomStore = Provider.of<ClassroomStore>(context);
     // TODO: do people put Provider.of in here? :/ No time to ponder that question, though.
     futureFetchFiles =
-        Provider.of<ClassroomStore>(context).fetchClassroomFiles("", 1);
+        Provider.of<ClassroomStore>(context).fetchClassroomFiles("", classroomStore.getCurrentClassroom().id);
   }
 
   @override

@@ -1,5 +1,4 @@
 import '../rest_client.dart';
-import 'package:remind_clone_flutter/models/classroom.dart';
 import '../endpoints.dart';
 import '../network_exceptions.dart';
 

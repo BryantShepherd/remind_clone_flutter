@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 class PeopleShareLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    String text = 'https://medium.com/@suryadevsingh24032000';
-    String subject = 'follow me';
-
     return Scaffold(
       appBar: AppBar(
         title: Text("Share link"),

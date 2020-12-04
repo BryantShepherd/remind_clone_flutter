@@ -1,11 +1,12 @@
 import "package:flutter/foundation.dart";
-import 'package:remind_clone_flutter/data/network/network_exceptions.dart';
 import "../models/classroom.dart";
 import "package:remind_clone_flutter/data/network/api/classroom_api.dart";
 import "package:remind_clone_flutter/data/network/rest_client.dart";
 
 class ClassroomStore with ChangeNotifier {
   List<Classroom> classrooms = [];
+  Classroom currentClassroom;
+
   var _client = RestClient();
 
   void addClassroom(Classroom newClassroom) {
@@ -34,9 +35,11 @@ class ClassroomStore with ChangeNotifier {
     var classroomApi = ClassroomApi(_client);
 
     var classrooms = await classroomApi.getUserClassrooms(token);
+    var classroomList = List<Classroom>();
     for (var classroom in classrooms) {
-      this.addClassroom(Classroom.fromJson(classroom));
+      classroomList.add(Classroom.fromJson(classroom));
     }
+    setClassrooms(classroomList);
   }
 
   void resetClassrooms(){
@@ -62,5 +65,15 @@ class ClassroomStore with ChangeNotifier {
     }
 
     return classroom.files;
+  }
+
+  void setCurrentClassroom(int currentClassroomId) {
+    currentClassroom = classrooms.firstWhere((element) => element.id == currentClassroomId);
+    notifyListeners();
+  }
+
+  Classroom getCurrentClassroom() {
+    print("object");
+    return currentClassroom;
   }
 }

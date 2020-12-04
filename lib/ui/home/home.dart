@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:remind_clone_flutter/ui/class/class_create.dart';
-import 'package:remind_clone_flutter/ui/class/class_join.dart';
 import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
 import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
@@ -10,7 +9,6 @@ import 'widgets/home_tab_message.dart';
 import 'package:provider/provider.dart';
 import 'widgets/home_tab_file.dart';
 import 'package:remind_clone_flutter/widgets/submenu_fab.dart';
-import 'package:provider/provider.dart';
 
 enum MenuActions { account, logOut }
 
@@ -52,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Current Class"),
+        title: Text(classroomStore.currentClassroom.name),
         bottom: TabBar(
           controller: this._tabController,
           isScrollable: true,
@@ -90,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen>
                 case MenuActions.logOut:
                   {
                     Navigator.pop(context);
-                    userStore.logout();
+                    userStore.resetUser();
                     classroomStore.resetClassrooms();
                   }
                   break;
@@ -153,7 +151,9 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Drawer buildDrawer(BuildContext context) {
-    var classroomStore = Provider.of<ClassroomStore>(context);
+    final classroomStore = Provider.of<ClassroomStore>(context);
+    final userStore = Provider.of<UserStore>(context);
+
     var joinedClassrooms = classroomStore.getJoinedClassrooms();
     var ownedClassrooms = classroomStore.getOwnedClassrooms();
 
@@ -183,7 +183,10 @@ class _HomeScreenState extends State<HomeScreen>
           size: 35.0,
         ),
         title: Text(classroom.name),
-        onTap: () {},
+        onTap: () {
+          classroomStore.setCurrentClassroom(classroom.id);
+          Navigator.pop(context);
+        },
       ));
     }
 
@@ -213,7 +216,10 @@ class _HomeScreenState extends State<HomeScreen>
           size: 35.0,
         ),
         title: Text(classroom.name),
-        onTap: () {},
+        onTap: () {
+          classroomStore.setCurrentClassroom(classroom.id);
+          Navigator.pop(context);
+        },
       ));
     }
 

@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
 
-class SettingsTab extends StatelessWidget {
+class SettingsTab extends StatefulWidget {
+  @override
+  _SettingsTabState createState() => _SettingsTabState();
+}
+
+class _SettingsTabState extends State<SettingsTab> {
   @override
   Widget build(BuildContext context) {
+    final classroomStore = Provider.of<ClassroomStore>(context);
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       children: [
@@ -29,6 +38,7 @@ class SettingsTab extends StatelessWidget {
               ),
               hintText: 'Class name'),
           onChanged: (text) {},
+          initialValue: classroomStore.getCurrentClassroom().name,
         ),
         Padding(padding: const EdgeInsets.all(5.0)),
         Text(
@@ -47,6 +57,7 @@ class SettingsTab extends StatelessWidget {
               ),
               hintText: 'Class code'),
           onChanged: (text) {},
+          initialValue: classroomStore.getCurrentClassroom().code,
         ),
         Padding(padding: const EdgeInsets.all(5.0)),
         Text(
@@ -65,6 +76,7 @@ class SettingsTab extends StatelessWidget {
               ),
               hintText: 'School name'),
           onChanged: (text) {},
+          initialValue: classroomStore.getCurrentClassroom().school,
         ),
         Padding(padding: const EdgeInsets.all(10.0)),
         ListTile(
