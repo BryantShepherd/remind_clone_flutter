@@ -1,51 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
+import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:remind_clone_flutter/ui/login/login.dart';
 
 class UserSettings extends StatelessWidget {
-  final List<Map<String, dynamic>> _list = [
-    {
-      "title": "Your Account",
-      "icon": Icons.account_circle,
-      "widget": null,
-    },
-    {
-      "title": "Notifications",
-      "icon": Icons.notifications,
-      "widget": null,
-    },
-    {
-      "title": "Family members",
-      "icon": Icons.add,
-      "widget": null,
-    },
-    {
-      "title": "Organizations",
-      "icon": Icons.home,
-      "widget": null,
-    },
-    {
-      "title": "App integrations",
-      "icon": Icons.flash_on,
-      "widget": null,
-    },
-    {
-      "title": "Data and privacy",
-      "icon": Icons.privacy_tip,
-      "widget": null,
-    },
-    {
-      "title": "Help",
-      "icon": Icons.help,
-      "widget": null,
-    },
-    {
-      "title": "Log out",
-      "icon": Icons.logout,
-      "widget": null,
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final userStore = Provider.of<UserStore>(context, listen: false);
+    final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
+
+    final List<Map<String, dynamic>> _list = [
+      {
+        "title": "Your Account",
+        "icon": Icons.account_circle,
+        "function": () {
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => null)
+          );
+        },
+      },
+      {
+        "title": "Notifications",
+        "icon": Icons.notifications,
+        "function": null,
+      },
+      {
+        "title": "Family members",
+        "icon": Icons.add,
+        "function": null,
+      },
+      {
+        "title": "Organizations",
+        "icon": Icons.home,
+        "function": null,
+      },
+      {
+        "title": "App integrations",
+        "icon": Icons.flash_on,
+        "function": null,
+      },
+      {
+        "title": "Data and privacy",
+        "icon": Icons.privacy_tip,
+        "function": null,
+      },
+      {
+        "title": "Help",
+        "icon": Icons.help,
+        "function": null,
+      },
+      {
+        "title": "Log out",
+        "icon": Icons.logout,
+        "function": () {
+          {
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => LoginScreen())
+            );
+            userStore.logout();
+            classroomStore.resetClassrooms();
+          }
+        },
+      },
+    ];
     return Scaffold(
       appBar: AppBar(
         title: Text("Account Settings"),
@@ -54,13 +72,9 @@ class UserSettings extends StatelessWidget {
         children: [
           for (int i = 0; i < _list.length; i++)
             ListTile(
-              leading: Icon(_list[i]["icon"], size: 30.0,),
-              title: Text(_list[i]["title"]),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => _list[i]["widget"])
-                );
-              },
+                leading: Icon(_list[i]["icon"], size: 30.0,),
+                title: Text(_list[i]["title"]),
+                onTap: _list[i]["function"],
             ),
         ],
       ),

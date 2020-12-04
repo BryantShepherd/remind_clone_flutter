@@ -208,6 +208,14 @@ class ParticipantMessaging extends StatefulWidget {
 }
 
 class _ParticipantMessagingState extends State<ParticipantMessaging> {
+  String _participantMessaging = "";
+
+  void handleRadioValue(String value) {
+    setState(() {
+      _participantMessaging = value;
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -227,8 +235,9 @@ class _ParticipantMessagingState extends State<ParticipantMessaging> {
               children: [
                 Text("On"),
                 Radio(
-                  onChanged: (bool) {},
-                  value: 1,
+                  onChanged: handleRadioValue,
+                  value: "On",
+                  groupValue: _participantMessaging,
                 ),
               ],
             ),
@@ -240,8 +249,9 @@ class _ParticipantMessagingState extends State<ParticipantMessaging> {
               children: [
                 Text("Role-based"),
                 Radio(
-                  onChanged: (bool) {},
-                  value: 2,
+                  onChanged: handleRadioValue,
+                  value: "Role-based",
+                  groupValue: _participantMessaging,
                 ),
               ],
             ),
@@ -254,8 +264,9 @@ class _ParticipantMessagingState extends State<ParticipantMessaging> {
               children: [
                 Text("Off"),
                 Radio(
-                  onChanged: (bool) {},
-                  value: 3,
+                  onChanged: handleRadioValue,
+                  value: "Off",
+                  groupValue: _participantMessaging,
                 )
               ],
             ),

@@ -46,6 +46,9 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final userStore = Provider.of<UserStore>(context, listen: false);
+    final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Current Class"),
@@ -86,6 +89,8 @@ class _HomeScreenState extends State<HomeScreen>
                 case MenuActions.logOut:
                   {
                     Navigator.pop(context);
+                    userStore.logout();
+                    classroomStore.resetClassrooms();
                   }
                   break;
               }

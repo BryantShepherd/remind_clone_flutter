@@ -32,4 +32,8 @@ class ClassroomStore with ChangeNotifier {
       this.addClassroom(Classroom.fromJson(classroom));
     }
   }
+
+  void resetClassrooms(){
+    classrooms = [];
+  }
 }
