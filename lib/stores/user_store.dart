@@ -35,4 +35,9 @@ class UserStore with ChangeNotifier {
       throw e;
     }
   }
+
+  void logout() {
+    user = null;
+    token = null;
+  }
 }

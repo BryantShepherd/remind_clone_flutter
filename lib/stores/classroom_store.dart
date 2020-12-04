@@ -39,6 +39,10 @@ class ClassroomStore with ChangeNotifier {
     }
   }
 
+  void resetClassrooms(){
+    classrooms = [];
+  }
+
   Future<List<ClassroomFile>> fetchClassroomFiles(
       String token, int classroomId) async {
     var classroom = getClassroomById(classroomId);

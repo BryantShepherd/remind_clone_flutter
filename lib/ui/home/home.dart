@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:remind_clone_flutter/ui/class/class_create.dart';
+import 'package:remind_clone_flutter/ui/class/class_join.dart';
+import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
+import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/models/classroom.dart';
@@ -6,6 +10,7 @@ import 'widgets/home_tab_message.dart';
 import 'package:provider/provider.dart';
 import 'widgets/home_tab_file.dart';
 import 'package:remind_clone_flutter/widgets/submenu_fab.dart';
+import 'package:provider/provider.dart';
 
 enum MenuActions { account, logOut }
 
@@ -22,9 +27,7 @@ class _HomeScreenState extends State<HomeScreen>
     "People": Center(
       child: Text("People"),
     ),
-    "Settings": Center(
-      child: Text("Settings"),
-    ),
+    "Settings": SettingsTab(),
   };
 
   TabController _tabController;
@@ -44,6 +47,9 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final userStore = Provider.of<UserStore>(context, listen: false);
+    final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Current Class"),
@@ -74,21 +80,34 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           PopupMenuButton<MenuActions>(
             onSelected: (result) {
-              if (result == MenuActions.logOut) {
-                Navigator.pop(context);
+              switch (result) {
+                case MenuActions.account:
+                  {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => UserSettings()));
+                  }
+                  break;
+                case MenuActions.logOut:
+                  {
+                    Navigator.pop(context);
+                    userStore.logout();
+                    classroomStore.resetClassrooms();
+                  }
+                  break;
               }
             },
             itemBuilder: (BuildContext context) {
               return <PopupMenuEntry<MenuActions>>[
                 const PopupMenuItem(
-                  child: Text("Select me!"),
+                  value: MenuActions.account,
+                  child: Text("Account settings"),
                 ),
                 const PopupMenuItem(
                   child: Text("Select me!"),
                 ),
                 const PopupMenuItem(
                   value: MenuActions.logOut,
-                  child: Text("Get me out!"),
+                  child: Text("Log out!"),
                 ),
               ];
             },
@@ -138,17 +157,61 @@ class _HomeScreenState extends State<HomeScreen>
     var joinedClassrooms = classroomStore.getJoinedClassrooms();
     var ownedClassrooms = classroomStore.getOwnedClassrooms();
 
-    List<ListTile> joinedClassroomTiles = [];
+    List<ListTile> joinedClassroomTiles = [
+      ListTile(
+        title: Text("Joined"),
+      ),
+      ListTile(
+        leading: Icon(
+          Icons.add_circle_outline,
+          size: 35.0,
+        ),
+        title: Text('Join class'),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ClassCreate(),
+            ),
+          );
+        },
+      ),
+    ];
     for (Classroom classroom in joinedClassrooms) {
       joinedClassroomTiles.add(ListTile(
+        leading: Icon(
+          Icons.account_circle,
+          size: 35.0,
+        ),
         title: Text(classroom.name),
         onTap: () {},
       ));
     }
 
-    List<ListTile> ownedClassroomTiles = [];
+    List<ListTile> ownedClassroomTiles = [
+      ListTile(
+        title: Text("Created"),
+      ),
+      ListTile(
+        leading: Icon(
+          Icons.add_circle_outline,
+          size: 35.0,
+        ),
+        title: Text('Create class'),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ClassCreate(),
+            ),
+          );
+        },
+      ),
+    ];
     for (Classroom classroom in ownedClassrooms) {
       ownedClassroomTiles.add(ListTile(
+        leading: Icon(
+          Icons.account_circle,
+          size: 35.0,
+        ),
         title: Text(classroom.name),
         onTap: () {},
       ));
@@ -158,19 +221,34 @@ class _HomeScreenState extends State<HomeScreen>
       child: ListView(
         children: [
           DrawerHeader(
-            child: Center(
-              child: Consumer<UserStore>(
-                builder: (context, store, child) {
-                  String userName = store.getUser().name;
-                  return Text(
-                    userName,
-                    style: Theme.of(context).textTheme.headline5.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
+            child: Column(
+              children: [
+                IconButton(
+                    icon: Icon(
+                      Icons.account_circle,
+                      color: Colors.white,
+                    ),
+                    iconSize: 80.0,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => UserSettings(),
                         ),
-                  );
-                },
-              ),
+                      );
+                    }),
+                Consumer<UserStore>(
+                  builder: (context, store, child) {
+                    String userName = store.getUser().name;
+                    return Text(
+                      userName,
+                      style: Theme.of(context).textTheme.headline5.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                    );
+                  },
+                ),
+              ],
             ),
             decoration: BoxDecoration(
               color: Colors.blue,
