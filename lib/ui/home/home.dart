@@ -260,8 +260,8 @@ class _HomeScreenState extends State<HomeScreen>
               color: Colors.blue,
             ),
           ),
-          ...joinedClassroomTiles,
           ...ownedClassroomTiles,
+          ...joinedClassroomTiles,
         ],
       ),
     );
