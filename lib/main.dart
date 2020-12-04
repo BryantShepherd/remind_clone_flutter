@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:remind_clone_flutter/routes.dart';
-import 'package:remind_clone_flutter/ui/home/widgets/people_user_info.dart';
-import 'package:remind_clone_flutter/ui/home/widgets/people_user_info_test.dart';
+import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
 
 void main() {
-  runApp(RemindClone());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserStore()),
+        ChangeNotifierProvider(create: (context) => ClassroomStore()),
+      ],
+      child: RemindClone(),
+    ),
+  );
 }
 
 class RemindClone extends StatelessWidget {
@@ -12,11 +21,8 @@ class RemindClone extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Remind Clone",
-      // home: Center(
-      //   child: Text("Hello World"),
-      // ),
-      // routes: Routes.routes,
-      home: ProfileUserInfo(),
+      initialRoute: "/login",
+      routes: Routes.routes,
     );
   }
 }
