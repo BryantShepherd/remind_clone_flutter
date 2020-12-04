@@ -7,6 +7,7 @@ import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/models/classroom.dart';
 import 'widgets/home_tab_message.dart';
+import 'package:provider/provider.dart';
 import 'widgets/home_tab_file.dart';
 import 'package:remind_clone_flutter/widgets/submenu_fab.dart';
 import 'package:provider/provider.dart';
@@ -136,6 +137,14 @@ class _HomeScreenState extends State<HomeScreen>
               print("hi me");
             },
           ],
+        );
+        break;
+      case 1:
+        return FloatingActionButton(
+          onPressed: () {
+            print("Upload File");
+          },
+          child: Icon(Icons.file_upload),
         );
         break;
       default:
