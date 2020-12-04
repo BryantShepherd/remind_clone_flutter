@@ -74,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           .fetchUserClassrooms(userStore.getToken());
                       print(userStore.getUser().name);
                       print(classroomStore.getJoinedClassrooms());
+                      classroomStore.setCurrentClassroom(classroomStore.classrooms.first.id);
                       Navigator.pushNamed(
                         context,
                         Routes.home,

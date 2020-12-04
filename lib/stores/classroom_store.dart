@@ -73,7 +73,6 @@ class ClassroomStore with ChangeNotifier {
   }
 
   Classroom getCurrentClassroom() {
-    print("object");
     return currentClassroom;
   }
 }
