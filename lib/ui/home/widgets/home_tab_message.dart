@@ -1,19 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
+import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/models/classroom/conversation.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
+import 'package:remind_clone_flutter/stores/user_store.dart';
 
-class MessageTab extends StatelessWidget {
+class MessageTab extends StatefulWidget {
+  @override
+  _MessageTabState createState() => _MessageTabState();
+}
+
+class _MessageTabState extends State<MessageTab> {
+  Future<List<Conversation>> futureFetchConvos;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final classroomStore = Provider.of<ClassroomStore>(context);
+    final userStore = Provider.of<UserStore>(context, listen: false);
+    futureFetchConvos = classroomStore.fetchConversations(
+        userStore.getToken(), classroomStore.currentClassroom.id);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        _ConversationListTile(),
-        _ConversationListTile(),
-      ],
+    return FutureBuilder(
+      future: futureFetchConvos,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          List<_ConversationListTile> children = [];
+
+          for (var conversation in snapshot.data) {
+            children.add(
+              _ConversationListTile(
+                conversation
+              ),
+            );
+          }
+          return ListView(
+            children: children,
+          );
+        } else if (snapshot.hasError) {
+          // TODO: show error dialog here.
+          return Text("${snapshot.error}");
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
   }
 }
 
 class _ConversationListTile extends StatelessWidget {
+  final Conversation conversation;
+
+  _ConversationListTile(this.conversation);
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -24,16 +67,11 @@ class _ConversationListTile extends StatelessWidget {
           color: Colors.black,
         ),
       ),
-      title: Text('Tuan Anh'),
-      subtitle: Text(
-        'You: Hello! Em an com chua?',
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: Text('12/02/2000'),
+      title: Text(conversation.name),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ConversationScreen(),
+            builder: (context) => ConversationScreen(conversation),
           ),
         );
       },
@@ -42,6 +80,10 @@ class _ConversationListTile extends StatelessWidget {
 }
 
 class ConversationScreen extends StatefulWidget {
+  final Conversation conversation;
+
+  ConversationScreen(this.conversation);
+
   @override
   _ConversationScreenState createState() => _ConversationScreenState();
 }
@@ -49,11 +91,17 @@ class ConversationScreen extends StatefulWidget {
 class _ConversationScreenState extends State<ConversationScreen> {
   final messageInputController = TextEditingController();
 
+  List<Widget> _buildMessageList() {
+    return [];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final conversation = widget.conversation;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tuan Anh'),
+        title: Text(conversation.name),
         actions: [
           IconButton(
             icon: Icon(Icons.info_outline),
@@ -69,12 +117,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
           children: [
             Expanded(
               child: ListView(
-                children: [
-                  MessageBubble(
-                    content:
-                        "An Ox came down to a reedy pool to drink. As he splashed heavily into the water, he crushed a young Frog into the mud.",
-                  ),
-                ],
+                children: _buildMessageList(),
               ),
             ),
             MessageTextBox(messageInputController: messageInputController),
