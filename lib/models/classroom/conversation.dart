@@ -28,6 +28,7 @@ class Conversation {
     if (messages == null) {
       throw NullThrownError();
     }
+    message.setConversation(this);
     this.messages.add(message);
   }
 
@@ -46,9 +47,20 @@ class Message {
   String messageText;
   String message;
   String createdAt;
+  Conversation conversation;
 
-  Message(
-      {this.id, this.messageText, this.sender, this.message, this.createdAt});
+  Message({
+    this.id,
+    this.messageText,
+    this.sender,
+    this.message,
+    this.createdAt,
+    this.conversation,
+  });
+
+  void setConversation(Conversation conversation) {
+    this.conversation = conversation;
+  }
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(

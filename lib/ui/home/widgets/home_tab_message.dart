@@ -32,9 +32,7 @@ class _MessageTabState extends State<MessageTab> {
 
           for (var conversation in snapshot.data) {
             children.add(
-              _ConversationListTile(
-                conversation
-              ),
+              _ConversationListTile(conversation),
             );
           }
           return ListView(
@@ -90,15 +88,34 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationScreenState extends State<ConversationScreen> {
   final messageInputController = TextEditingController();
+  Future<List<Message>> futureFetchMessages;
 
-  List<Widget> _buildMessageList() {
-    return [];
+  List<Widget> _buildMessageList(List<Message> messages) {
+    final List<MessageBubble> messageBubbles = [];
+
+    for (var message in messages) {
+      messageBubbles.add(
+        MessageBubble(
+          message: message,
+        ),
+      );
+    }
+
+    return messageBubbles;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final classroomStore = Provider.of<ClassroomStore>(context);
+    final userStore = Provider.of<UserStore>(context, listen: false);
+    futureFetchMessages =
+        classroomStore.fetchMessages(userStore.getToken(), widget.conversation);
   }
 
   @override
   Widget build(BuildContext context) {
     final conversation = widget.conversation;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(conversation.name),
@@ -110,21 +127,38 @@ class _ConversationScreenState extends State<ConversationScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: ListView(
-                children: _buildMessageList(),
-              ),
-            ),
-            MessageTextBox(messageInputController: messageInputController),
-          ],
-        ),
-      ),
+      body: _buildBody(),
     );
+  }
+
+  Widget _buildBody() {
+    return FutureBuilder(
+        future: futureFetchMessages,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: ListView(
+                      children: _buildMessageList(snapshot.data),
+                    ),
+                  ),
+                  MessageTextBox(
+                      messageInputController: messageInputController),
+                ],
+              ),
+            );
+          } else if (snapshot.hasError) {
+            // TODO: show error dialog here.
+            return Text("${snapshot.error}");
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        });
   }
 }
 
@@ -198,10 +232,7 @@ class MessageTextBox extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  final String senderName;
-  final String content;
-  final String createdAt;
-  final String avatarUrl;
+  final Message message;
   final bool isMine = false;
 
   final CircleAvatar userAvatar = CircleAvatar(
@@ -222,8 +253,7 @@ class MessageBubble extends StatelessWidget {
     alignment: Alignment.bottomLeft,
   );
 
-  MessageBubble(
-      {this.avatarUrl, this.senderName, this.content, this.createdAt});
+  MessageBubble({this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +266,7 @@ class MessageBubble extends StatelessWidget {
         ),
         Expanded(
           child: Bubble(
-            child: Text(this.content),
+            child: Text(message.message),
             padding: BubbleEdges.all(12.0),
             style: isMine ? myMessageStyle : otherMessageStyle,
           ),

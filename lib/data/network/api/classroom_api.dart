@@ -53,4 +53,16 @@ class ClassroomApi {
       throw e;
     }
   }
+
+  Future<List<dynamic>> getMessages(String token, String conversationId) async {
+    try {
+      var requestUrl = Endpoints.baseUrl + "/message/$conversationId";
+      var res = await this._client.getWithBearerToken(requestUrl, token);
+
+      return res["data"] as List<dynamic>;
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
 }

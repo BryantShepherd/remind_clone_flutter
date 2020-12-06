@@ -97,6 +97,32 @@ class ClassroomStore with ChangeNotifier {
     return classroom.conversations;
   }
 
+  Future<List<Message>> fetchMessages(
+      String token, Conversation conversation) async {
+    try {
+      if (conversation.messages != null) {
+        return conversation.messages;
+      }
+
+      var classroomApi = ClassroomApi(_client);
+      var messages =
+          await classroomApi.getMessages(token, conversation.id.toString());
+
+      List<Message> newMessages = [];
+      Message message;
+      for (var messageObj in messages) {
+        message = Message.fromJson(messageObj)..setConversation(conversation);
+        newMessages.add(message);
+      }
+
+      conversation.setMessages(newMessages);
+      return conversation.messages;
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
   void setCurrentClassroom(int currentClassroomId) {
     currentClassroom =
         classrooms.firstWhere((element) => element.id == currentClassroomId);
