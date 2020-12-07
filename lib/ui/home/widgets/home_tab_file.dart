@@ -15,11 +15,6 @@ class _FileTabState extends State<FileTab> {
   Future<void> futureFetchFiles;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
@@ -35,32 +30,7 @@ class _FileTabState extends State<FileTab> {
       future: futureFetchFiles,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          List<_FileListTile> children = [];
-
-          for (var file in snapshot.data) {
-            children.add(
-              _FileListTile(
-                file: file,
-                onDownload: () async {
-                  bool granted = await _checkPermission();
-                  String savedDir = await _findLocalPath();
-                  if (granted) {
-                    await FlutterDownloader.enqueue(
-                      url: file.url,
-                      savedDir: savedDir,
-                      showNotification:
-                          true, // show download progress in status bar (for Android)
-                      openFileFromNotification:
-                          true, // click on notification to open downloaded file (for Android)
-                    );
-                  }
-                },
-              ),
-            );
-          }
-          return ListView(
-            children: children,
-          );
+          return _buildFileList(snapshot.data);
         } else if (snapshot.hasError) {
           // TODO: show error dialog here.
           return Text("${snapshot.error}");
@@ -71,7 +41,48 @@ class _FileTabState extends State<FileTab> {
       },
     );
   }
-  
+
+  Widget _buildFileList(List<ClassroomFile> files) {
+    List<_FileListTile> children = [];
+
+    for (var file in files) {
+      children.add(
+        _FileListTile(
+          file: file,
+          onDownload: () async {
+            bool granted = await _checkPermission();
+            String savedDir = await _findLocalPath();
+            if (granted) {
+              await FlutterDownloader.enqueue(
+                url: file.url,
+                savedDir: savedDir,
+                showNotification:
+                    true, // show download progress in status bar (for Android)
+                openFileFromNotification:
+                    true, // click on notification to open downloaded file (for Android)
+              );
+            }
+          },
+        ),
+      );
+    }
+    if (children.length == 0) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("Welcome to Files", style: Theme.of(context).textTheme.headline5,),
+            Text(
+                "All of the files that you share to your class will be in here."),
+          ],
+        ),
+      );
+    }
+    return ListView(
+      children: children,
+    );
+  }
+
   Future<bool> _checkPermission() async {
     final status = await Permission.storage.status;
     if (status != PermissionStatus.granted) {
