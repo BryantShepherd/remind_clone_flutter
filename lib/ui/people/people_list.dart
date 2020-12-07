@@ -1,9 +1,61 @@
 import 'package:flutter/material.dart';
 
-class PeopleList extends StatelessWidget {
+class PeopleAddPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    return Container(
+      height: 300,
+      child: Column(
+        children: [
+          Container(
+            height: 70,
+            child: Center(
+              child: Text(
+                "Add to class",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 25,
+                ),
+              ),
+            ),
+          ),
+          const Divider(thickness: 1),
+          // Expanded(
+          //   child: ListView.builder(
+          //     itemCount: 21,
+          //     itemBuilder: (context, index) {
+          //       return ListTile(
+          //         title: Text("Text2"),
+          //       );
+          //     },
+          //   ),
+          // ),
+          ListTile(
+            leading: Icon(Icons.email_outlined),
+            title: Text('Phone number or email'),
+          ),
+          ListTile(
+            leading: Icon(Icons.contact_mail_outlined),
+            title: Text('Pick from contacts'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class PeopleList extends StatelessWidget {
+  void showPeopleAddPrompt(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return PeopleAddPrompt();
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: ListView(
@@ -23,6 +75,9 @@ class PeopleList extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.account_circle, size: 35, color: Colors.green,),
             title: Text('Add people'),
+            onTap: () {
+              showPeopleAddPrompt(context);
+            },
           ),
           ListTile(
             leading: Icon(Icons.link, size: 35, color: Colors.orange,),
