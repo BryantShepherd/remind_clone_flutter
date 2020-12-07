@@ -1,3 +1,5 @@
+import 'classroom/conversation.dart';
+
 class Classroom {
   int id;
   String code;
@@ -5,6 +7,7 @@ class Classroom {
   String school;
   String type;
   List<ClassroomFile> files = [];
+  List<Conversation> conversations;
 
   Classroom({this.id, this.code, this.name, this.school, this.type});
 
@@ -14,6 +17,17 @@ class Classroom {
 
   void addFile(ClassroomFile file) {
     this.files.add(file);
+  }
+
+  void setConversations(List<Conversation> convos) {
+    this.conversations = convos;
+  }
+
+  void addConversation(Conversation convo) {
+    if (this.conversations == null) {
+      throw NullThrownError();
+    }
+    this.conversations.add(convo);
   }
 
   factory Classroom.fromJson(Map<String, dynamic> json) {
