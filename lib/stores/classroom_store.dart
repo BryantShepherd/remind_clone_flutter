@@ -18,6 +18,7 @@ class ClassroomStore with ChangeNotifier {
       int conversationId = msg["conversationId"];
       var conversation = getConversationById(conversationId);
       var newMessage = Message.fromJson(msg);
+      newMessage.setConversation(conversation);
       addMessage(conversation, newMessage);
     });
   }
