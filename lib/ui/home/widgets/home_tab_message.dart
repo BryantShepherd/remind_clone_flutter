@@ -147,7 +147,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
                     ),
                   ),
                   MessageTextBox(
-                      messageInputController: messageInputController),
+                    messageInputController: messageInputController,
+                  ),
                 ],
               ),
             );
@@ -257,20 +258,34 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    return Column(
       children: [
-        userAvatar,
-        SizedBox(
-          width: 10.0,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            CircleAvatar(
+              backgroundImage: NetworkImage(message.sender.avatarUrl),
+            ),
+            SizedBox(
+              width: 10.0,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("  " +
+                      message.sender.name), // I know... I am a moron, okay :v
+                  Bubble(
+                    child: Text(message.message),
+                    padding: BubbleEdges.all(12.0),
+                    style: isMine ? myMessageStyle : otherMessageStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        Expanded(
-          child: Bubble(
-            child: Text(message.message),
-            padding: BubbleEdges.all(12.0),
-            style: isMine ? myMessageStyle : otherMessageStyle,
-          ),
-        ),
+        SizedBox(height: 10.0),
       ],
     );
   }
