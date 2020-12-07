@@ -5,6 +5,7 @@ import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/models/classroom.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class FileTab extends StatefulWidget {
   @override
@@ -18,10 +19,10 @@ class _FileTabState extends State<FileTab> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final classroomStore = Provider.of<ClassroomStore>(context);
+    final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
     // TODO: do people put Provider.of in here? :/ No time to ponder that question, though.
-    futureFetchFiles = Provider.of<ClassroomStore>(context)
-        .fetchClassroomFiles("", classroomStore.getCurrentClassroom().id);
+    futureFetchFiles = classroomStore.fetchClassroomFiles(
+        "", classroomStore.getCurrentClassroom().id);
   }
 
   @override
@@ -30,7 +31,10 @@ class _FileTabState extends State<FileTab> {
       future: futureFetchFiles,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _buildFileList(snapshot.data);
+          return Consumer<ClassroomStore>(
+            builder: (c, store, ch) =>
+                _buildFileList(store.currentClassroom.files, store),
+          );
         } else if (snapshot.hasError) {
           // TODO: show error dialog here.
           return Text("${snapshot.error}");
@@ -42,7 +46,9 @@ class _FileTabState extends State<FileTab> {
     );
   }
 
-  Widget _buildFileList(List<ClassroomFile> files) {
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+  Widget _buildFileList(List<ClassroomFile> files, ClassroomStore classroomStore) {
     List<_FileListTile> children = [];
 
     for (var file in files) {
@@ -66,20 +72,38 @@ class _FileTabState extends State<FileTab> {
         ),
       );
     }
+
+    Widget child;
+
     if (children.length == 0) {
-      return Center(
+      child = Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Welcome to Files", style: Theme.of(context).textTheme.headline5,),
+            Text(
+              "Welcome to Files",
+              style: Theme.of(context).textTheme.headline5,
+            ),
             Text(
                 "All of the files that you share to your class will be in here."),
           ],
         ),
       );
+    } else {
+      child = ListView(
+        children: children,
+      );
     }
-    return ListView(
-      children: children,
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullDown: true,
+      onRefresh: () async {
+        await classroomStore.fetchClassroomFiles(
+            "", classroomStore.currentClassroom.id,
+            forced: true);
+        _refreshController.refreshCompleted();
+      },
+      child: child,
     );
   }
 
