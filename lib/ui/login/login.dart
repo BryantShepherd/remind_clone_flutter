@@ -77,9 +77,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           .fetchUserClassrooms(userStore.getToken());
                       classroomStore.setCurrentClassroom(
                           classroomStore.classrooms.first.id);
-                      final SocketService socketService =
-                          Injector().get<SocketService>();
-                      socketService.createSocketConnection();
+                      final socketService = Injector().get<SocketService>();
+                      socketService.connectWithToken(
+                          socketService.socket, userStore.getToken());
                       Navigator.pushNamed(
                         context,
                         Routes.home,

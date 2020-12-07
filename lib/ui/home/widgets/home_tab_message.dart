@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
+import 'package:flutter_simple_dependency_injection/injector.dart';
 import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/data/network/socket_service.dart';
 import 'package:remind_clone_flutter/models/classroom/conversation.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
@@ -89,6 +91,7 @@ class ConversationScreen extends StatefulWidget {
 class _ConversationScreenState extends State<ConversationScreen> {
   final messageInputController = TextEditingController();
   Future<List<Message>> futureFetchMessages;
+  final SocketService socketService = Injector().get<SocketService>();
 
   List<Widget> _buildMessageList(List<Message> messages) {
     final List<MessageBubble> messageBubbles = [];
@@ -105,12 +108,19 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final classroomStore = Provider.of<ClassroomStore>(context);
-    final userStore = Provider.of<UserStore>(context, listen: false);
-    futureFetchMessages =
-        classroomStore.fetchMessages(userStore.getToken(), widget.conversation);
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userStore = Provider.of<UserStore>(context, listen: false);
+      Provider.of<ClassroomStore>(
+        context,
+        listen: false,
+      )..fetchMessages(
+          userStore.getToken(),
+          widget.conversation,
+        );
+
+    });
   }
 
   @override
@@ -127,39 +137,46 @@ class _ConversationScreenState extends State<ConversationScreen> {
           ),
         ],
       ),
-      body: _buildBody(),
-    );
-  }
+      body: Consumer<ClassroomStore>(
+        builder: (context, store, child) {
+          final userStore = Provider.of<UserStore>(context, listen: false);
+          bool messageFetched = conversation.messages != null;
+          return messageFetched
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: ListView(
+                          children: _buildMessageList(
+                            widget.conversation.messages,
+                          ),
+                        ),
+                      ),
+                      MessageTextBox(
+                        messageInputController: messageInputController,
+                        onSend: () {
+                          socketService.socket.emit("NEW_MESSAGE", {
+                            "message": messageInputController.text,
+                            "messageText": messageInputController.text,
+                            "createdAt": DateTime.now().toIso8601String(),
+                            "conversationId": widget.conversation.id,
+                            "sender": userStore.getUser().toJson(),
+                          });
 
-  Widget _buildBody() {
-    return FutureBuilder(
-        future: futureFetchMessages,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: ListView(
-                      children: _buildMessageList(snapshot.data),
-                    ),
+                          messageInputController.text = "";
+                        },
+                      ),
+                    ],
                   ),
-                  MessageTextBox(
-                    messageInputController: messageInputController,
-                  ),
-                ],
-              ),
-            );
-          } else if (snapshot.hasError) {
-            // TODO: show error dialog here.
-            return Text("${snapshot.error}");
-          }
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        });
+                )
+              : Center(
+                  child: CircularProgressIndicator(),
+                );
+        },
+      ),
+    );
   }
 }
 

@@ -1,4 +1,6 @@
 import "package:flutter/foundation.dart";
+import 'package:flutter_simple_dependency_injection/injector.dart';
+import 'package:remind_clone_flutter/data/network/socket_service.dart';
 import 'package:remind_clone_flutter/models/classroom/conversation.dart';
 import "../models/classroom.dart";
 import "package:remind_clone_flutter/data/network/api/classroom_api.dart";
@@ -7,8 +9,30 @@ import "package:remind_clone_flutter/data/network/rest_client.dart";
 class ClassroomStore with ChangeNotifier {
   List<Classroom> classrooms = [];
   Classroom currentClassroom;
+  final SocketService socketService = Injector().get<SocketService>();
 
   var _client = RestClient();
+
+  ClassroomStore() {
+    this.socketService.socket.on("NEW_MESSAGE", (dynamic msg) {
+      int conversationId = msg["conversationId"];
+      var conversation = getConversationById(conversationId);
+      var newMessage = Message.fromJson(msg);
+      addMessage(conversation, newMessage);
+    });
+  }
+
+  Conversation getConversationById(int conversationId) {
+    for (var classroom in classrooms) {
+      for (var convo in classroom.conversations) {
+        if (convo.id == conversationId) {
+          return convo;
+        }
+      }
+    }
+
+    return null;
+  }
 
   void addClassroom(Classroom newClassroom) {
     this.classrooms.add(newClassroom);
@@ -116,11 +140,17 @@ class ClassroomStore with ChangeNotifier {
       }
 
       conversation.setMessages(newMessages);
+      notifyListeners();
       return conversation.messages;
     } catch (e) {
       print(e);
       throw e;
     }
+  }
+
+  void addMessage(Conversation conversation, Message message) {
+    conversation.addMessage(message);
+    notifyListeners();
   }
 
   void setCurrentClassroom(int currentClassroomId) {
