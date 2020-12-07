@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_simple_dependency_injection/injector.dart';
 import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/data/network/socket_service.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/routes.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -72,9 +75,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       await userStore.login(email, password);
                       await classroomStore
                           .fetchUserClassrooms(userStore.getToken());
-                      print(userStore.getUser().name);
-                      print(classroomStore.getJoinedClassrooms());
-                      classroomStore.setCurrentClassroom(classroomStore.classrooms.first.id);
+                      classroomStore.setCurrentClassroom(
+                          classroomStore.classrooms.first.id);
+                      final SocketService socketService =
+                          Injector().get<SocketService>();
+                      socketService.createSocketConnection();
                       Navigator.pushNamed(
                         context,
                         Routes.home,
