@@ -10,6 +10,7 @@ import 'widgets/home_tab_message.dart';
 import 'package:provider/provider.dart';
 import 'widgets/home_tab_file.dart';
 import 'package:remind_clone_flutter/widgets/submenu_fab.dart';
+import '../people/people_list.dart';
 
 enum MenuActions { account, logOut }
 
@@ -23,14 +24,13 @@ class _HomeScreenState extends State<HomeScreen>
   final Map<String, Widget> tabs = {
     "Messages": MessageTab(),
     "Files": FileTab(),
-    "People": Center(
-      child: Text("People"),
-    ),
+    "People": PeopleList(),
     "Settings": SettingsTab(),
   };
 
   Future<bool> _onWillPop() async {
-    return await SystemChannels.platform.invokeMethod<bool>('SystemNavigator.pop', true);
+    return await SystemChannels.platform
+        .invokeMethod<bool>('SystemNavigator.pop', true);
   }
 
   TabController _tabController;
