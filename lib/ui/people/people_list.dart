@@ -44,12 +44,46 @@ class PeopleAddPrompt extends StatelessWidget {
   }
 }
 
+class PopUp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 300,
+      child: Column(
+        children: [
+          Container(
+            height: 70,
+            child: Center(
+              child: Text(
+                "User",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 25,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class PeopleList extends StatelessWidget {
   void showPeopleAddPrompt(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
       builder: (context) {
         return PeopleAddPrompt();
+      },
+    );
+  }
+
+  void showPopUp(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return PopUp();
       },
     );
   }
@@ -82,6 +116,9 @@ class PeopleList extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.link, size: 35, color: Colors.orange,),
             title: Text('Share a join link'),
+            onTap: () {
+              showPopUp(context);
+            },
           ),
           SizedBox(
             height: 20,
