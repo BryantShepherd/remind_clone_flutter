@@ -22,7 +22,7 @@ class _FileTabState extends State<FileTab> {
     final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
     // TODO: do people put Provider.of in here? :/ No time to ponder that question, though.
     futureFetchFiles = classroomStore.fetchClassroomFiles(
-        "", classroomStore.getCurrentClassroom().id);
+        "", classroomStore.getCurrentClassroom()?.id);
   }
 
   @override
@@ -37,7 +37,20 @@ class _FileTabState extends State<FileTab> {
           );
         } else if (snapshot.hasError) {
           // TODO: show error dialog here.
-          return Text("${snapshot.error}");
+          print("${snapshot.error}");
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Welcome to Files",
+                  style: Theme.of(context).textTheme.headline5,
+                ),
+                Text(
+                    "All of the files that you share to your class will be in here."),
+              ],
+            ),
+          );
         }
         return Center(
           child: CircularProgressIndicator(),

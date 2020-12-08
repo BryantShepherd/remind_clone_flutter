@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen>
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(classroomStore.currentClassroom.name),
+          title: Text(classroomStore.currentClassroom != null? classroomStore.currentClassroom.name : ""),
           bottom: TabBar(
             controller: this._tabController,
             isScrollable: true,
