@@ -1,8 +1,10 @@
 class Endpoints {
   Endpoints._();
 
+  static const String host = "http://10.0.2.2:3000";
+
   // base url
-  static const String baseUrl = "http://10.0.2.2:3000/api";
+  static const String baseUrl = "$host/api";
 
   // receiveTimeout
   static const int receiveTimeout = 5000;

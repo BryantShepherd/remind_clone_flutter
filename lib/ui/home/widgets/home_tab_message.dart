@@ -1,19 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
+import 'package:flutter_simple_dependency_injection/injector.dart';
+import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/data/network/socket_service.dart';
+import 'package:remind_clone_flutter/models/classroom/conversation.dart';
+import 'package:remind_clone_flutter/models/user/user.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
+import 'package:remind_clone_flutter/stores/user_store.dart';
 
-class MessageTab extends StatelessWidget {
+class MessageTab extends StatefulWidget {
+  @override
+  _MessageTabState createState() => _MessageTabState();
+}
+
+class _MessageTabState extends State<MessageTab> {
+  Future<List<Conversation>> futureFetchConvos;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final classroomStore = Provider.of<ClassroomStore>(context);
+    final userStore = Provider.of<UserStore>(context, listen: false);
+    futureFetchConvos = classroomStore.fetchConversations(
+        userStore.getToken(), classroomStore.currentClassroom.id);
+  }
+
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: futureFetchConvos,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return _buildConvoList(snapshot.data);
+        } else if (snapshot.hasError) {
+          // TODO: show error dialog here.
+          return Text("${snapshot.error}");
+        }
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+  }
+
+  Widget _buildConvoList(List<Conversation> convos) {
+    List<_ConversationListTile> children = [];
+
+    for (var conversation in convos) {
+      children.add(
+        _ConversationListTile(conversation),
+      );
+    }
+    if (children.length == 0) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Welcome to Messages",
+              style: Theme.of(context).textTheme.headline5,
+            ),
+            Text(
+                "All of your conversations will appear here."),
+          ],
+        ),
+      );
+    }
     return ListView(
-      children: [
-        _ConversationListTile(),
-        _ConversationListTile(),
-      ],
+      children: children,
     );
   }
 }
 
 class _ConversationListTile extends StatelessWidget {
+  final Conversation conversation;
+
+  _ConversationListTile(this.conversation);
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -24,16 +87,11 @@ class _ConversationListTile extends StatelessWidget {
           color: Colors.black,
         ),
       ),
-      title: Text('Tuan Anh'),
-      subtitle: Text(
-        'You: Hello! Em an com chua?',
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: Text('12/02/2000'),
+      title: Text(conversation.name),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ConversationScreen(),
+            builder: (context) => ConversationScreen(conversation),
           ),
         );
       },
@@ -42,18 +100,78 @@ class _ConversationListTile extends StatelessWidget {
 }
 
 class ConversationScreen extends StatefulWidget {
+  final Conversation conversation;
+
+  ConversationScreen(this.conversation);
+
   @override
   _ConversationScreenState createState() => _ConversationScreenState();
 }
 
 class _ConversationScreenState extends State<ConversationScreen> {
   final messageInputController = TextEditingController();
+  Future<List<Message>> futureFetchMessages;
+  final SocketService socketService = Injector().get<SocketService>();
+
+  Widget _buildMessageList(List<Message> messages, User sender) {
+    final List<MessageBubble> messageBubbles = [];
+
+    for (var message in messages) {
+      messageBubbles.add(
+        MessageBubble(
+          message: message,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ListView(children: messageBubbles),
+          ),
+          MessageTextBox(
+            messageInputController: messageInputController,
+            onSend: () {
+              socketService.socket.emit("NEW_MESSAGE", {
+                "message": messageInputController.text,
+                "messageText": messageInputController.text,
+                "createdAt": DateTime.now().toIso8601String(),
+                "conversationId": widget.conversation.id,
+                "sender": sender.toJson(),
+              });
+
+              messageInputController.text = "";
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userStore = Provider.of<UserStore>(context, listen: false);
+      Provider.of<ClassroomStore>(
+        context,
+        listen: false,
+      )..fetchMessages(
+          userStore.getToken(),
+          widget.conversation,
+        );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final conversation = widget.conversation;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tuan Anh'),
+        title: Text(conversation.name),
         actions: [
           IconButton(
             icon: Icon(Icons.info_outline),
@@ -62,24 +180,16 @@ class _ConversationScreenState extends State<ConversationScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: ListView(
-                children: [
-                  MessageBubble(
-                    content:
-                        "An Ox came down to a reedy pool to drink. As he splashed heavily into the water, he crushed a young Frog into the mud.",
-                  ),
-                ],
-              ),
-            ),
-            MessageTextBox(messageInputController: messageInputController),
-          ],
-        ),
+      body: Consumer<ClassroomStore>(
+        builder: (context, store, child) {
+          final userStore = Provider.of<UserStore>(context, listen: false);
+          bool messageFetched = conversation.messages != null;
+          return messageFetched
+              ? _buildMessageList(conversation.messages, userStore.getUser())
+              : Center(
+                  child: CircularProgressIndicator(),
+                );
+        },
       ),
     );
   }
@@ -155,10 +265,7 @@ class MessageTextBox extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  final String senderName;
-  final String content;
-  final String createdAt;
-  final String avatarUrl;
+  final Message message;
   final bool isMine = false;
 
   final CircleAvatar userAvatar = CircleAvatar(
@@ -179,25 +286,38 @@ class MessageBubble extends StatelessWidget {
     alignment: Alignment.bottomLeft,
   );
 
-  MessageBubble(
-      {this.avatarUrl, this.senderName, this.content, this.createdAt});
+  MessageBubble({this.message});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    return Column(
       children: [
-        userAvatar,
-        SizedBox(
-          width: 10.0,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            CircleAvatar(
+              backgroundImage: NetworkImage(message.sender.avatarUrl),
+            ),
+            SizedBox(
+              width: 10.0,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("  " +
+                      message.sender.name), // I know... I am a moron, okay :v
+                  Bubble(
+                    child: Text(message.message),
+                    padding: BubbleEdges.all(12.0),
+                    style: isMine ? myMessageStyle : otherMessageStyle,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        Expanded(
-          child: Bubble(
-            child: Text(this.content),
-            padding: BubbleEdges.all(12.0),
-            style: isMine ? myMessageStyle : otherMessageStyle,
-          ),
-        ),
+        SizedBox(height: 10.0),
       ],
     );
   }

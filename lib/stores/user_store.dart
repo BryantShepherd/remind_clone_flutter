@@ -36,7 +36,7 @@ class UserStore with ChangeNotifier {
     }
   }
 
-  void logout() {
+  void resetUser() {
     user = null;
     token = null;
   }

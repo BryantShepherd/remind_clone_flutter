@@ -58,7 +58,7 @@ class UserSettings extends StatelessWidget {
             Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => LoginScreen())
             );
-            userStore.logout();
+            userStore.resetUser();
             classroomStore.resetClassrooms();
           }
         },

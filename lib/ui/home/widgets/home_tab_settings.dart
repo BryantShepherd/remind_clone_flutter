@@ -1,8 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
 
-class SettingsTab extends StatelessWidget {
+class SettingsTab extends StatefulWidget {
+  @override
+  _SettingsTabState createState() => _SettingsTabState();
+}
+
+class _SettingsTabState extends State<SettingsTab> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController codeController = TextEditingController();
+  final TextEditingController schoolController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    final classroomStore = Provider.of<ClassroomStore>(context);
+
+    nameController.text = classroomStore.getCurrentClassroom()?.name;
+    codeController.text = classroomStore.getCurrentClassroom()?.code;
+    schoolController.text = classroomStore.getCurrentClassroom()?.school;
+
+
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       children: [
@@ -29,6 +47,7 @@ class SettingsTab extends StatelessWidget {
               ),
               hintText: 'Class name'),
           onChanged: (text) {},
+          controller: nameController,
         ),
         Padding(padding: const EdgeInsets.all(5.0)),
         Text(
@@ -47,6 +66,7 @@ class SettingsTab extends StatelessWidget {
               ),
               hintText: 'Class code'),
           onChanged: (text) {},
+          controller: codeController,
         ),
         Padding(padding: const EdgeInsets.all(5.0)),
         Text(
@@ -65,6 +85,7 @@ class SettingsTab extends StatelessWidget {
               ),
               hintText: 'School name'),
           onChanged: (text) {},
+          controller: schoolController,
         ),
         Padding(padding: const EdgeInsets.all(10.0)),
         ListTile(
@@ -79,7 +100,8 @@ class SettingsTab extends StatelessWidget {
             ],
           ),
           subtitle: Text(
-              "Only people you add or approve will be able to join this class"),
+            "Only people you add or approve will be able to join this class",
+          ),
           contentPadding: const EdgeInsets.all(0.0),
         ),
         Padding(padding: const EdgeInsets.all(10.0)),
@@ -215,7 +237,7 @@ class _ParticipantMessagingState extends State<ParticipantMessaging> {
       _participantMessaging = value;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

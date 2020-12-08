@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:provider/provider.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/models/classroom.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class FileTab extends StatefulWidget {
   @override
@@ -12,16 +16,13 @@ class _FileTabState extends State<FileTab> {
   Future<void> futureFetchFiles;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
     // TODO: do people put Provider.of in here? :/ No time to ponder that question, though.
-    futureFetchFiles =
-        Provider.of<ClassroomStore>(context).fetchClassroomFiles("", 1);
+    futureFetchFiles = classroomStore.fetchClassroomFiles(
+        "", classroomStore.getCurrentClassroom().id);
   }
 
   @override
@@ -30,17 +31,9 @@ class _FileTabState extends State<FileTab> {
       future: futureFetchFiles,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          List<_FileListTile> children = [];
-
-          for (var file in snapshot.data) {
-            children.add(
-              _FileListTile(
-                file: file,
-              ),
-            );
-          }
-          return ListView(
-            children: children,
+          return Consumer<ClassroomStore>(
+            builder: (c, store, ch) =>
+                _buildFileList(store.currentClassroom.files, store),
           );
         } else if (snapshot.hasError) {
           // TODO: show error dialog here.
@@ -52,15 +45,97 @@ class _FileTabState extends State<FileTab> {
       },
     );
   }
+
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+  Widget _buildFileList(List<ClassroomFile> files, ClassroomStore classroomStore) {
+    List<_FileListTile> children = [];
+
+    for (var file in files) {
+      children.add(
+        _FileListTile(
+          file: file,
+          onDownload: () async {
+            bool granted = await _checkPermission();
+            String savedDir = await _findLocalPath();
+            if (granted) {
+              await FlutterDownloader.enqueue(
+                url: file.url,
+                savedDir: savedDir,
+                showNotification:
+                    true, // show download progress in status bar (for Android)
+                openFileFromNotification:
+                    true, // click on notification to open downloaded file (for Android)
+              );
+            }
+          },
+        ),
+      );
+    }
+
+    Widget child;
+
+    if (children.length == 0) {
+      child = Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Welcome to Files",
+              style: Theme.of(context).textTheme.headline5,
+            ),
+            Text(
+                "All of the files that you share to your class will be in here."),
+          ],
+        ),
+      );
+    } else {
+      child = ListView(
+        children: children,
+      );
+    }
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullDown: true,
+      onRefresh: () async {
+        await classroomStore.fetchClassroomFiles(
+            "", classroomStore.currentClassroom.id,
+            forced: true);
+        _refreshController.refreshCompleted();
+      },
+      child: child,
+    );
+  }
+
+  Future<bool> _checkPermission() async {
+    final status = await Permission.storage.status;
+    if (status != PermissionStatus.granted) {
+      final result = await Permission.storage.request();
+      if (result == PermissionStatus.granted) {
+        return true;
+      }
+    } else {
+      return true;
+    }
+    return false;
+  }
+
+  Future<String> _findLocalPath() async {
+    // ONLY SUPPORT ANDROID, DON'T USE ON OTHER PLATFORM
+    final directory = await getExternalStorageDirectory();
+    return directory.path;
+  }
 }
 
 class _FileListTile extends StatelessWidget {
   final IconData leadingIconData;
   final ClassroomFile file;
+  final VoidCallback onDownload;
 
   _FileListTile({
     this.leadingIconData = Icons.insert_drive_file,
     @required this.file,
+    this.onDownload,
   });
 
   @override
@@ -81,7 +156,8 @@ class _FileListTile extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => _FileDetailScreen(this.file),
+            builder: (context) =>
+                _FileDetailScreen(this.file, onDownload: onDownload),
           ),
         );
       },
@@ -91,8 +167,9 @@ class _FileListTile extends StatelessWidget {
 
 class _FileDetailScreen extends StatelessWidget {
   final ClassroomFile file;
+  final VoidCallback onDownload;
 
-  _FileDetailScreen(this.file);
+  _FileDetailScreen(this.file, {this.onDownload});
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +190,7 @@ class _FileDetailScreen extends StatelessWidget {
               ),
             ],
           ),
-          ElevatedButton(onPressed: () {}, child: Text("Open")),
+          ElevatedButton(onPressed: onDownload, child: Text("Open")),
           Card(
             margin: EdgeInsets.zero,
             elevation: 1,

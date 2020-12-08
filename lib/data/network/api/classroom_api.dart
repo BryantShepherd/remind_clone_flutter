@@ -1,5 +1,4 @@
 import '../rest_client.dart';
-import 'package:remind_clone_flutter/models/classroom.dart';
 import '../endpoints.dart';
 import '../network_exceptions.dart';
 
@@ -30,6 +29,34 @@ class ClassroomApi {
   ) async {
     try {
       var requestUrl = Endpoints.baseUrl + "/file/$classroomId";
+      var res = await this._client.getWithBearerToken(requestUrl, token);
+
+      return res["data"] as List<dynamic>;
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  Future<List<dynamic>> getConversations(
+    String token,
+    String classroomId,
+  ) async {
+    try {
+      var requestUrl =
+          Endpoints.baseUrl + "/user/conversations?classroomId=$classroomId";
+      var res = await this._client.getWithBearerToken(requestUrl, token);
+
+      return res["data"] as List<dynamic>;
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  Future<List<dynamic>> getMessages(String token, String conversationId) async {
+    try {
+      var requestUrl = Endpoints.baseUrl + "/message/$conversationId";
       var res = await this._client.getWithBearerToken(requestUrl, token);
 
       return res["data"] as List<dynamic>;
