@@ -30,7 +30,8 @@ class RestClient {
   }
 
   // Post:----------------------------------------------------------------------
-  Future<dynamic> post(String url, {Map<String, String> headers, body, encoding}) {
+  Future<dynamic> post(String url,
+      {Map<String, String> headers, body, encoding}) {
     return http
         .post(url, body: body, headers: headers, encoding: encoding)
         .then((http.Response response) {
@@ -54,6 +55,14 @@ class RestClient {
     return this.get(
       url,
       headers: {"Authorization": "Bearer $token"},
+    );
+  }
+
+  Future<dynamic> postWithBearerToken(String url, String token, Map<String, String> body) {
+    return post(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+      body: body,
     );
   }
 }

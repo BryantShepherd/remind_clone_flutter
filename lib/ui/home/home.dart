@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:remind_clone_flutter/ui/class/class_create.dart';
+import 'package:remind_clone_flutter/ui/class/class_join.dart';
 import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
 import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
@@ -83,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen>
               splashRadius: 20.0,
             ),
             PopupMenuButton<MenuActions>(
-              onSelected: (result) {
+              onSelected: (result) async {
                 switch (result) {
                   case MenuActions.account:
                     {
@@ -94,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen>
                   case MenuActions.logOut:
                     {
                       Navigator.pop(context);
-                      userStore.resetUser();
+                      await userStore.resetUser();
                       classroomStore.resetClassrooms();
                     }
                     break;
@@ -171,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen>
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => ClassCreate(),
+              builder: (context) => ClassJoin(),
             ),
           );
         },
