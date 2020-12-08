@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1026203142638",
+    "firebase_url": "https://remind-clone.firebaseio.com",
+    "project_id": "remind-clone",
+    "storage_bucket": "remind-clone.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1026203142638:android:dcd737797d9af98c3066ff",
+        "android_client_info": {
+          "package_name": "com.example.remind_clone_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1026203142638-1jfbkaspmi0jgmm9qjsfp0qgbe8ji998.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiY1qsArVvOVeyZz9GO8VHTqFOqyRcN7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1026203142638-1jfbkaspmi0jgmm9qjsfp0qgbe8ji998.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
