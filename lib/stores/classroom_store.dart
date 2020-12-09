@@ -70,15 +70,17 @@ class ClassroomStore with ChangeNotifier {
 
   void resetClassrooms() {
     classrooms = [];
+    currentClassroom = null;
   }
 
   Future<List<ClassroomFile>> fetchClassroomFiles(
     String token,
-    int classroomId,
-  ) async {
+    int classroomId, {
+    bool forced = false,
+  }) async {
     var classroom = getClassroomById(classroomId);
 
-    if (classroom.files.length > 0) {
+    if (classroom.files.length > 0 && !forced) {
       // TODO: I can't tell if the files have been fetched before this way.
       return classroom.files;
     }
@@ -89,19 +91,26 @@ class ClassroomStore with ChangeNotifier {
       classroomId.toString(),
     );
 
+    List<ClassroomFile> newFiles = [];
+
     for (var file in classroomFiles) {
-      classroom.addFile(ClassroomFile.fromJson(file));
+      newFiles.add(ClassroomFile.fromJson(file));
     }
+
+    classroom.setFiles(newFiles);
+
+    notifyListeners();
 
     return classroom.files;
   }
 
   Future<List<Conversation>> fetchConversations(
     String token,
-    int classroomId,
-  ) async {
+    int classroomId, {
+    bool forced = false,
+  }) async {
     var classroom = getClassroomById(classroomId);
-    if (classroom.conversations != null) {
+    if (classroom.conversations != null && !forced) {
       return classroom.conversations;
     }
 

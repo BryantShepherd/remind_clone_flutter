@@ -4,6 +4,7 @@ import 'package:flutter_simple_dependency_injection/injector.dart';
 import 'package:provider/provider.dart';
 import 'package:remind_clone_flutter/data/network/socket_service.dart';
 import 'package:remind_clone_flutter/models/classroom/conversation.dart';
+import 'package:remind_clone_flutter/models/user/user.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 
@@ -21,7 +22,7 @@ class _MessageTabState extends State<MessageTab> {
     final classroomStore = Provider.of<ClassroomStore>(context);
     final userStore = Provider.of<UserStore>(context, listen: false);
     futureFetchConvos = classroomStore.fetchConversations(
-        userStore.getToken(), classroomStore.currentClassroom.id);
+        userStore.getToken(), classroomStore.currentClassroom?.id);
   }
 
   @override
@@ -30,24 +31,57 @@ class _MessageTabState extends State<MessageTab> {
       future: futureFetchConvos,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          List<_ConversationListTile> children = [];
-
-          for (var conversation in snapshot.data) {
-            children.add(
-              _ConversationListTile(conversation),
-            );
-          }
-          return ListView(
-            children: children,
-          );
+          return _buildConvoList(snapshot.data);
         } else if (snapshot.hasError) {
           // TODO: show error dialog here.
-          return Text("${snapshot.error}");
+          print("${snapshot.error}");
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Welcome to Messages",
+                  style: Theme.of(context).textTheme.headline5,
+                ),
+                Text(
+                    "All of your conversations will appear here."),
+              ],
+            ),
+          );
+
         }
         return Center(
           child: CircularProgressIndicator(),
         );
       },
+    );
+  }
+
+  Widget _buildConvoList(List<Conversation> convos) {
+    List<_ConversationListTile> children = [];
+
+    for (var conversation in convos) {
+      children.add(
+        _ConversationListTile(conversation),
+      );
+    }
+    if (children.length == 0) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Welcome to Messages",
+              style: Theme.of(context).textTheme.headline5,
+            ),
+            Text(
+                "All of your conversations will appear here."),
+          ],
+        ),
+      );
+    }
+    return ListView(
+      children: children,
     );
   }
 }
@@ -93,7 +127,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   Future<List<Message>> futureFetchMessages;
   final SocketService socketService = Injector().get<SocketService>();
 
-  List<Widget> _buildMessageList(List<Message> messages) {
+  Widget _buildMessageList(List<Message> messages, User sender) {
     final List<MessageBubble> messageBubbles = [];
 
     for (var message in messages) {
@@ -104,7 +138,31 @@ class _ConversationScreenState extends State<ConversationScreen> {
       );
     }
 
-    return messageBubbles;
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ListView(children: messageBubbles),
+          ),
+          MessageTextBox(
+            messageInputController: messageInputController,
+            onSend: () {
+              socketService.socket.emit("NEW_MESSAGE", {
+                "message": messageInputController.text,
+                "messageText": messageInputController.text,
+                "createdAt": DateTime.now().toIso8601String(),
+                "conversationId": widget.conversation.id,
+                "sender": sender.toJson(),
+              });
+
+              messageInputController.text = "";
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -119,7 +177,6 @@ class _ConversationScreenState extends State<ConversationScreen> {
           userStore.getToken(),
           widget.conversation,
         );
-
     });
   }
 
@@ -142,35 +199,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
           final userStore = Provider.of<UserStore>(context, listen: false);
           bool messageFetched = conversation.messages != null;
           return messageFetched
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: ListView(
-                          children: _buildMessageList(
-                            widget.conversation.messages,
-                          ),
-                        ),
-                      ),
-                      MessageTextBox(
-                        messageInputController: messageInputController,
-                        onSend: () {
-                          socketService.socket.emit("NEW_MESSAGE", {
-                            "message": messageInputController.text,
-                            "messageText": messageInputController.text,
-                            "createdAt": DateTime.now().toIso8601String(),
-                            "conversationId": widget.conversation.id,
-                            "sender": userStore.getUser().toJson(),
-                          });
-
-                          messageInputController.text = "";
-                        },
-                      ),
-                    ],
-                  ),
-                )
+              ? _buildMessageList(conversation.messages, userStore.getUser())
               : Center(
                   child: CircularProgressIndicator(),
                 );

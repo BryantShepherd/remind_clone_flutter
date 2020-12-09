@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:remind_clone_flutter/ui/class/class_create.dart';
+import 'package:remind_clone_flutter/ui/class/class_join.dart';
 import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
 import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
@@ -10,6 +11,7 @@ import 'widgets/home_tab_message.dart';
 import 'package:provider/provider.dart';
 import 'widgets/home_tab_file.dart';
 import 'package:remind_clone_flutter/widgets/submenu_fab.dart';
+import '../people/people_list.dart';
 
 enum MenuActions { account, logOut }
 
@@ -23,14 +25,13 @@ class _HomeScreenState extends State<HomeScreen>
   final Map<String, Widget> tabs = {
     "Messages": MessageTab(),
     "Files": FileTab(),
-    "People": Center(
-      child: Text("People"),
-    ),
+    "People": PeopleList(),
     "Settings": SettingsTab(),
   };
 
   Future<bool> _onWillPop() async {
-    return await SystemChannels.platform.invokeMethod<bool>('SystemNavigator.pop', true);
+    return await SystemChannels.platform
+        .invokeMethod<bool>('SystemNavigator.pop', true);
   }
 
   TabController _tabController;
@@ -56,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen>
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(classroomStore.currentClassroom.name),
+          title: Text(classroomStore.currentClassroom != null? classroomStore.currentClassroom.name : ""),
           bottom: TabBar(
             controller: this._tabController,
             isScrollable: true,
@@ -83,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen>
               splashRadius: 20.0,
             ),
             PopupMenuButton<MenuActions>(
-              onSelected: (result) {
+              onSelected: (result) async {
                 switch (result) {
                   case MenuActions.account:
                     {
@@ -94,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen>
                   case MenuActions.logOut:
                     {
                       Navigator.pop(context);
-                      userStore.resetUser();
+                      await userStore.resetUser();
                       classroomStore.resetClassrooms();
                     }
                     break;
@@ -145,14 +146,6 @@ class _HomeScreenState extends State<HomeScreen>
           ],
         );
         break;
-      case 1:
-        return FloatingActionButton(
-          onPressed: () {
-            print("Upload File");
-          },
-          child: Icon(Icons.file_upload),
-        );
-        break;
       default:
         return null;
     }
@@ -179,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen>
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => ClassCreate(),
+              builder: (context) => ClassJoin(),
             ),
           );
         },

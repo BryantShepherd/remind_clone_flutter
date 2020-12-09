@@ -5,27 +5,23 @@ class ProfileUserInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(),
         body: SafeArea(
           child: ListView(
             children: [
               Container(
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: NetworkImage(
-                            "add you image URL here "
-                        ),
-                        fit: BoxFit.cover
-                    )
-                ),
+                        image: NetworkImage("add you image URL here "),
+                        fit: BoxFit.cover)),
                 child: Container(
                   width: double.infinity,
                   height: 200,
                   child: Container(
-                    alignment: Alignment(0.0,2.25),
+                    alignment: Alignment(0.0, 2.25),
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          "Add you profile DP image URL here "
-                      ),
+                      backgroundImage:
+                          NetworkImage("Add you profile DP image URL here "),
                       radius: 60.0,
                     ),
                   ),
@@ -36,26 +32,24 @@ class ProfileUserInfo extends StatelessWidget {
                 height: 80,
               ),
               Text(
-                "Hung Nguyen Manh"
-                ,style: TextStyle(
-                  fontSize: 30.0,
-                  color:Colors.blueGrey,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.w400
-              ),
+                "Hung Nguyen Manh",
+                style: TextStyle(
+                    fontSize: 30.0,
+                    color: Colors.blueGrey,
+                    letterSpacing: 2.0,
+                    fontWeight: FontWeight.w400),
                 textAlign: TextAlign.center,
               ),
               SizedBox(
                 height: 60,
               ),
               Text(
-                "   Note"
-                ,style: TextStyle(
-                  fontSize: 15.0,
-                  color:Colors.black45,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.w300
-              ),
+                "   Note",
+                style: TextStyle(
+                    fontSize: 15.0,
+                    color: Colors.black45,
+                    letterSpacing: 2.0,
+                    fontWeight: FontWeight.w300),
               ),
               TextFormField(initialValue: "Add Note"),
               // ListTile(
@@ -66,13 +60,12 @@ class ProfileUserInfo extends StatelessWidget {
                 height: 40,
               ),
               Text(
-                "   Notifications"
-                ,style: TextStyle(
-                  fontSize: 15.0,
-                  color:Colors.black45,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.w300
-              ),
+                "   Notifications",
+                style: TextStyle(
+                    fontSize: 15.0,
+                    color: Colors.black45,
+                    letterSpacing: 2.0,
+                    fontWeight: FontWeight.w300),
               ),
               // Card(
               //     margin: EdgeInsets.symmetric(horizontal: 20.0,vertical: 8.0),
@@ -94,13 +87,12 @@ class ProfileUserInfo extends StatelessWidget {
                 height: 40,
               ),
               Text(
-                "   Classes Joined"
-                ,style: TextStyle(
-                  fontSize: 15.0,
-                  color:Colors.black45,
-                  letterSpacing: 2.0,
-                  fontWeight: FontWeight.w300
-              ),
+                "   Classes Joined",
+                style: TextStyle(
+                    fontSize: 15.0,
+                    color: Colors.black45,
+                    letterSpacing: 2.0,
+                    fontWeight: FontWeight.w300),
               ),
               ListTile(
                 leading: Icon(Icons.room),
@@ -253,7 +245,6 @@ class ProfileUserInfo extends StatelessWidget {
               // )
             ],
           ),
-        )
-    );
+        ));
   }
 }
