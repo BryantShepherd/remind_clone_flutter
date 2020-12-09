@@ -69,8 +69,7 @@ class ClassroomApi {
   Future<void> joinClassroom(String token, String code) async {
     try {
       var requestUrl = Endpoints.joinClassroomAPI;
-      var res =
-          await _client.postWithBearerToken("$requestUrl/$code", token, null);
+      await _client.postWithBearerToken("$requestUrl/$code", token, null);
     } catch (e) {
       print(e);
       throw e;
@@ -81,8 +80,7 @@ class ClassroomApi {
     try {
       final requestBody = {"name": name, "school": school};
       var requestUrl = Endpoints.createClassroomAPI;
-      var res =
-          await _client.postWithBearerToken(requestUrl, token, requestBody);
+      await _client.postWithBearerToken(requestUrl, token, requestBody);
     } catch (e) {
       print(e);
       throw e;

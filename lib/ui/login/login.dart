@@ -5,7 +5,6 @@ import 'package:remind_clone_flutter/data/network/socket_service.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/routes.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 
 class LoginScreen extends StatefulWidget {
   @override

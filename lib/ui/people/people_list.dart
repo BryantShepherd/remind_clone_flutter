@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 
@@ -98,9 +99,11 @@ class _PeopleListState extends State<PeopleList> {
     );
   }
 
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
   Widget _buildPeopleList(ClassroomStore store) {
     final members = store.getCurrentClassroom()?.members;
-    return ListView(
+    var child = ListView(
       padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 10.0),
       children: [
         Text(
@@ -158,6 +161,19 @@ class _PeopleListState extends State<PeopleList> {
             title: Text(member.name),
           ),
       ],
+    );
+
+    String token = Provider.of<UserStore>(context, listen: false).getToken();
+
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullDown: true,
+      onRefresh: () async {
+        await store.fetchClassroomMembers(token, store.getCurrentClassroom(),
+            forced: true);
+        _refreshController.refreshCompleted();
+      },
+      child: child,
     );
   }
 
