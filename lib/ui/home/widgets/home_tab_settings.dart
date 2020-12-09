@@ -8,17 +8,17 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController codeController = TextEditingController();
-  final TextEditingController schoolController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
+  final TextEditingController _schoolController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final classroomStore = Provider.of<ClassroomStore>(context);
 
-    nameController.text = classroomStore.getCurrentClassroom()?.name;
-    codeController.text = classroomStore.getCurrentClassroom()?.code;
-    schoolController.text = classroomStore.getCurrentClassroom()?.school;
+    _nameController.text = classroomStore.getCurrentClassroom()?.name;
+    _codeController.text = classroomStore.getCurrentClassroom()?.code;
+    _schoolController.text = classroomStore.getCurrentClassroom()?.school;
 
 
     return ListView(
@@ -47,7 +47,7 @@ class _SettingsTabState extends State<SettingsTab> {
               ),
               hintText: 'Class name'),
           onChanged: (text) {},
-          controller: nameController,
+          controller: _nameController,
         ),
         Padding(padding: const EdgeInsets.all(5.0)),
         Text(
@@ -66,7 +66,7 @@ class _SettingsTabState extends State<SettingsTab> {
               ),
               hintText: 'Class code'),
           onChanged: (text) {},
-          controller: codeController,
+          controller: _codeController,
         ),
         Padding(padding: const EdgeInsets.all(5.0)),
         Text(
@@ -85,7 +85,7 @@ class _SettingsTabState extends State<SettingsTab> {
               ),
               hintText: 'School name'),
           onChanged: (text) {},
-          controller: schoolController,
+          controller: _schoolController,
         ),
         Padding(padding: const EdgeInsets.all(10.0)),
         ListTile(

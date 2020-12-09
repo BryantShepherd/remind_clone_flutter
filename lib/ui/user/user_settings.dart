@@ -53,12 +53,12 @@ class UserSettings extends StatelessWidget {
       {
         "title": "Log out",
         "icon": Icons.logout,
-        "function": () {
+        "function": () async {
           {
             Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => LoginScreen())
             );
-            userStore.resetUser();
+            await userStore.resetUser();
             classroomStore.resetClassrooms();
           }
         },

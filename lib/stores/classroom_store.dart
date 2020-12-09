@@ -70,6 +70,7 @@ class ClassroomStore with ChangeNotifier {
 
   void resetClassrooms() {
     classrooms = [];
+    currentClassroom = null;
   }
 
   Future<List<ClassroomFile>> fetchClassroomFiles(

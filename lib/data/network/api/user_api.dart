@@ -9,6 +9,17 @@ class UserApi {
 
   UserApi(this._client);
 
+  Future<Map<String, dynamic>> getProfle(String token) async {
+    try {
+      final res = await _client.getWithBearerToken(Endpoints.getProfile, token);
+      final user = User.fromJson(res["data"]);
+      return {"user": user};
+    } catch (e) {
+      print(e.toString());
+      throw e;
+    }
+  }
+
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
       final reqBody = {"email": email, "password": password};
