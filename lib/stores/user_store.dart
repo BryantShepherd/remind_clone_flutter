@@ -13,9 +13,7 @@ class UserStore with ChangeNotifier {
   UserStore() {
     _userApi = UserApi(_client);
   }
-
-  var _client = new RestClient();
-
+  
   void setUser(User user) {
     this.user = user;
   }
