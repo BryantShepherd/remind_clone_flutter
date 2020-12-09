@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:remind_clone_flutter/data/network/socket_service.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:remind_clone_flutter/ui/login/register.dart';
 
 import 'package:remind_clone_flutter/widgets/bezierContainer.dart';
 
@@ -217,12 +218,12 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _createAccountLabel() {
     return InkWell(
       onTap: () {
-        // Navigator.push(
-        //     context, MaterialPageRoute(builder: (context) => SignUpPage()));
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => RegisterScreen()));
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 20),
-        padding: EdgeInsets.all(15),
+        padding: EdgeInsets.symmetric(horizontal: 15),
         alignment: Alignment.bottomCenter,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -308,7 +309,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 20),
                   _divider(),
                   _facebookButton(),
-                  SizedBox(height: height * .055),
                   _createAccountLabel(),
                 ],
               ),

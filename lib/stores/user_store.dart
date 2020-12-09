@@ -6,6 +6,12 @@ import "package:remind_clone_flutter/data/network/rest_client.dart";
 class UserStore with ChangeNotifier {
   String token;
   User user;
+  final _client = new RestClient();
+  UserApi _userApi;
+
+  UserStore() {
+    _userApi = UserApi(_client);
+  }
 
   void setUser(User user) {
     this.user = user;
@@ -24,10 +30,8 @@ class UserStore with ChangeNotifier {
   }
 
   Future<void> login(String email, String password) async {
-    RestClient client = new RestClient();
-    UserApi userApi = new UserApi(client);
     try {
-      var res = await userApi.login(email, password);
+      var res = await _userApi.login(email, password);
       this.setToken(res["token"] as String);
       this.setUser(res["user"] as User);
     } catch (e) {
@@ -39,5 +43,14 @@ class UserStore with ChangeNotifier {
   void resetUser() {
     user = null;
     token = null;
+  }
+
+  Future<void> register(String fullname, String email, String password, int roleId) async {
+    try {
+      await _userApi.register(fullname, email, password, roleId);
+    } catch (e) {
+      print(e.toString());
+      throw e;
+    }
   }
 }
