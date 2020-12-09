@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/stores/classroom_store.dart';
+import 'package:remind_clone_flutter/stores/user_store.dart';
 
 class PeopleAddPrompt extends StatelessWidget {
   @override
@@ -20,16 +23,6 @@ class PeopleAddPrompt extends StatelessWidget {
             ),
           ),
           const Divider(thickness: 1),
-          // Expanded(
-          //   child: ListView.builder(
-          //     itemCount: 21,
-          //     itemBuilder: (context, index) {
-          //       return ListTile(
-          //         title: Text("Text2"),
-          //       );
-          //     },
-          //   ),
-          // ),
           ListTile(
             leading: Icon(Icons.email_outlined),
             title: Text('Phone number or email'),
@@ -69,7 +62,24 @@ class PopUp extends StatelessWidget {
   }
 }
 
-class PeopleList extends StatelessWidget {
+class PeopleList extends StatefulWidget {
+  @override
+  _PeopleListState createState() => _PeopleListState();
+}
+
+class _PeopleListState extends State<PeopleList> {
+  Future futureFetchMembers;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
+    final userStore = Provider.of<UserStore>(context, listen: false);
+
+    futureFetchMembers = classroomStore.fetchClassroomMembers(
+        userStore.getToken(), classroomStore.getCurrentClassroom());
+  }
+
   void showPeopleAddPrompt(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
@@ -88,8 +98,8 @@ class PeopleList extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildPeopleList(ClassroomStore store) {
+    final members = store.getCurrentClassroom()?.members;
     return ListView(
       padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 10.0),
       children: [
@@ -140,12 +150,34 @@ class PeopleList extends StatelessWidget {
         SizedBox(
           height: 10,
         ),
-        for (int i = 0; i < 10; ++i)
+        for (var member in members)
           ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Name'),
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(member.avatarUrl),
+            ),
+            title: Text(member.name),
           ),
       ],
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: futureFetchMembers,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Consumer<ClassroomStore>(
+              builder: (c, store, ch) => _buildPeopleList(store),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text("Fetch Failed"),
+            );
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        });
   }
 }
