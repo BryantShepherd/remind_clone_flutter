@@ -173,7 +173,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       Provider.of<ClassroomStore>(
         context,
         listen: false,
-      )..fetchMessages(
+      ).fetchMessages(
           userStore.getToken(),
           widget.conversation,
         );

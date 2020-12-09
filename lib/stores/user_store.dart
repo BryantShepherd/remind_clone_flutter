@@ -50,7 +50,7 @@ class UserStore with ChangeNotifier {
     prefs.remove("token");
   }
 
-  Future<User> autoLogin() async {
+  Future<bool> autoLogin() async {
     UserApi userApi = new UserApi(_client);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString("token");
@@ -58,8 +58,7 @@ class UserStore with ChangeNotifier {
       try {
         var res = await userApi.getProfle(token);
         this.setUser(res["user"] as User);
-        print(getUser().toJson());
-        return getUser();
+        return getToken() != null;
       } catch (e) {
         print(e.toString());
         throw e;
