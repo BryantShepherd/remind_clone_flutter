@@ -7,6 +7,8 @@ import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/utils/app_initializer.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:firebase_core/firebase_core.dart' as firebase_core;
+
 import 'utils/dependency_injection.dart';
 
 Injector injector;
@@ -18,7 +20,8 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   await FlutterDownloader.initialize(debug: true);
-
+  await firebase_core.Firebase.initializeApp();
+  
   runApp(
     MultiProvider(
       providers: [

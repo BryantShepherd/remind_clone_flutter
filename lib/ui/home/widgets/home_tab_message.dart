@@ -1,12 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
 import 'package:flutter_simple_dependency_injection/injector.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 import 'package:remind_clone_flutter/data/network/socket_service.dart';
+import 'package:remind_clone_flutter/models/classroom.dart';
 import 'package:remind_clone_flutter/models/classroom/conversation.dart';
 import 'package:remind_clone_flutter/models/user/user.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class MessageTab extends StatefulWidget {
   @override
@@ -43,12 +49,10 @@ class _MessageTabState extends State<MessageTab> {
                   "Welcome to Messages",
                   style: Theme.of(context).textTheme.headline5,
                 ),
-                Text(
-                    "All of your conversations will appear here."),
+                Text("All of your conversations will appear here."),
               ],
             ),
           );
-
         }
         return Center(
           child: CircularProgressIndicator(),
@@ -74,8 +78,7 @@ class _MessageTabState extends State<MessageTab> {
               "Welcome to Messages",
               style: Theme.of(context).textTheme.headline5,
             ),
-            Text(
-                "All of your conversations will appear here."),
+            Text("All of your conversations will appear here."),
           ],
         ),
       );
@@ -124,6 +127,11 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationScreenState extends State<ConversationScreen> {
   final messageInputController = TextEditingController();
+  final imagePicker = ImagePicker();
+
+  File _image;
+  ClassroomFile _attachment;
+
   Future<List<Message>> futureFetchMessages;
   final SocketService socketService = Injector().get<SocketService>();
 
@@ -155,9 +163,27 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 "createdAt": DateTime.now().toIso8601String(),
                 "conversationId": widget.conversation.id,
                 "sender": sender.toJson(),
+                "attachment": _attachment?.toJsonSnakeCase(), // don't ask why
               });
 
               messageInputController.text = "";
+              _attachment = null;
+            },
+            onOpenCamera: () async {
+              await _getImage(ImageSource.camera);
+              if (_image != null) {
+                String filename = path.basename(_image.path);
+                var task = await _uploadFile();
+                await task.whenComplete(() {});
+                String downloadUrl = await task.snapshot.ref.getDownloadURL();
+                _attachment = ClassroomFile(
+                    name: filename,
+                    url: downloadUrl,
+                    createdAt: DateTime.now().toIso8601String(),
+                    type:
+                        "image/jpeg" // because the img is taken from the camera, we can hard code the type.
+                    );
+              }
             },
           ),
         ],
@@ -173,10 +199,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
       Provider.of<ClassroomStore>(
         context,
         listen: false,
-      )..fetchMessages(
-          userStore.getToken(),
-          widget.conversation,
-        );
+      ).fetchMessages(
+        userStore.getToken(),
+        widget.conversation,
+      );
     });
   }
 
@@ -206,6 +232,31 @@ class _ConversationScreenState extends State<ConversationScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _getImage(ImageSource source) async {
+    final pickedFile = await imagePicker.getImage(source: source);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+        print(_image);
+      } else {
+        print("No image selected");
+      }
+    });
+  }
+
+  Future<firebase_storage.UploadTask> _uploadFile() async {
+    if (_image == null) {
+      return null;
+    }
+    firebase_storage.UploadTask uploadTask;
+    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child(path.basename(_image.path));
+    uploadTask = ref.putFile(_image);
+    return Future.value(uploadTask);
   }
 }
 
@@ -326,6 +377,11 @@ class MessageBubble extends StatelessWidget {
                     padding: BubbleEdges.all(12.0),
                     style: isMine ? myMessageStyle : otherMessageStyle,
                   ),
+                  if (message.attachment != null)
+                    Bubble(
+                      child: _buildAttachmentPreview(),
+                      padding: BubbleEdges.all(12.0),
+                    ),
                 ],
               ),
             ),
@@ -333,6 +389,20 @@ class MessageBubble extends StatelessWidget {
         ),
         SizedBox(height: 10.0),
       ],
+    );
+  }
+
+  Widget _buildAttachmentPreview() {
+    if (message.attachment.type != null) {
+      if (message.attachment.type.split("/")[0] == 'image') {
+        return Image(
+          image: NetworkImage(message.attachment?.url),
+          width: 150.0,
+        );
+      }
+    }
+    return Container(
+      child: Text("File Attached."),
     );
   }
 }

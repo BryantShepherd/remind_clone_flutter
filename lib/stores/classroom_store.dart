@@ -17,6 +17,9 @@ class ClassroomStore with ChangeNotifier {
     this.socketService.socket.on("NEW_MESSAGE", (dynamic msg) {
       int conversationId = msg["conversationId"];
       var conversation = getConversationById(conversationId);
+      if (conversation == null || conversation.messages == null) {
+        return;
+      }
       var newMessage = Message.fromJson(msg);
       newMessage.setConversation(conversation);
       addMessage(conversation, newMessage);
@@ -25,6 +28,9 @@ class ClassroomStore with ChangeNotifier {
 
   Conversation getConversationById(int conversationId) {
     for (var classroom in classrooms) {
+      if (classroom.conversations == null) {
+        continue;
+      }
       for (var convo in classroom.conversations) {
         if (convo.id == conversationId) {
           return convo;
