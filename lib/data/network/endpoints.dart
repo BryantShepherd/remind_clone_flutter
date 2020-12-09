@@ -15,6 +15,8 @@ class Endpoints {
   // user routes
   static const String loginAPI = baseUrl + "/user/auth/login";
 
+  static const String registerApi = baseUrl + "/user/auth/register";
+
   static const String getProfile = baseUrl + "/user/profile";
 
   // classroom routes
