@@ -75,8 +75,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       await userStore.login(email, password);
                       await classroomStore
                           .fetchUserClassrooms(userStore.getToken());
-                      classroomStore.setCurrentClassroom(
-                          classroomStore.classrooms.first.id);
+                      print(classroomStore.currentClassroom);
+                      if (classroomStore.classrooms.isNotEmpty) {
+                        classroomStore.setCurrentClassroom(
+                            classroomStore.classrooms.first.id);
+                      }
                       final socketService = Injector().get<SocketService>();
                       socketService.connectWithToken(
                           socketService.socket, userStore.getToken());
