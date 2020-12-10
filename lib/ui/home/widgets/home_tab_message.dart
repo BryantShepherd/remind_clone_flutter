@@ -1,12 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:bubble/bubble.dart';
 import 'package:flutter_simple_dependency_injection/injector.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 import 'package:remind_clone_flutter/data/network/socket_service.dart';
+import 'package:remind_clone_flutter/models/classroom.dart';
 import 'package:remind_clone_flutter/models/classroom/conversation.dart';
 import 'package:remind_clone_flutter/models/user/user.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class MessageTab extends StatefulWidget {
   @override
@@ -43,12 +49,10 @@ class _MessageTabState extends State<MessageTab> {
                   "Welcome to Messages",
                   style: Theme.of(context).textTheme.headline5,
                 ),
-                Text(
-                    "All of your conversations will appear here."),
+                Text("All of your conversations will appear here."),
               ],
             ),
           );
-
         }
         return Center(
           child: CircularProgressIndicator(),
@@ -74,8 +78,7 @@ class _MessageTabState extends State<MessageTab> {
               "Welcome to Messages",
               style: Theme.of(context).textTheme.headline5,
             ),
-            Text(
-                "All of your conversations will appear here."),
+            Text("All of your conversations will appear here."),
           ],
         ),
       );
@@ -124,16 +127,22 @@ class ConversationScreen extends StatefulWidget {
 
 class _ConversationScreenState extends State<ConversationScreen> {
   final messageInputController = TextEditingController();
+  final imagePicker = ImagePicker();
+
+  File _image;
+  ClassroomFile _attachment;
+
   Future<List<Message>> futureFetchMessages;
   final SocketService socketService = Injector().get<SocketService>();
 
-  Widget _buildMessageList(List<Message> messages, User sender) {
+  Widget _buildMessageList(List<Message> messages, User currentUser) {
     final List<MessageBubble> messageBubbles = [];
 
     for (var message in messages) {
       messageBubbles.add(
         MessageBubble(
           message: message,
+          isMine: currentUser.id == message.sender.id,
         ),
       );
     }
@@ -154,10 +163,29 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 "messageText": messageInputController.text,
                 "createdAt": DateTime.now().toIso8601String(),
                 "conversationId": widget.conversation.id,
-                "sender": sender.toJson(),
+                "sender": currentUser.toJson(),
+                "attachment": _attachment?.toJsonSnakeCase(), // don't ask why
               });
 
               messageInputController.text = "";
+              _attachment = null;
+            },
+            onOpenCamera: () async {
+              await _getImage(ImageSource.camera);
+              if (_image != null) {
+                String filename = path.basename(_image.path);
+                var task = await _uploadFile();
+                await task.whenComplete(() {});
+                String downloadUrl = await task.snapshot.ref.getDownloadURL();
+                _attachment = ClassroomFile(
+                    name: filename,
+                    url: downloadUrl,
+                    createdAt: DateTime.now().toIso8601String(),
+                    type:
+                        "image/jpeg" // because the img is taken from the camera, we can hard code the type.
+                    );
+                _sendAttachment(currentUser);
+              }
             },
           ),
         ],
@@ -174,9 +202,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
         context,
         listen: false,
       ).fetchMessages(
-          userStore.getToken(),
-          widget.conversation,
-        );
+        userStore.getToken(),
+        widget.conversation,
+      );
     });
   }
 
@@ -207,9 +235,47 @@ class _ConversationScreenState extends State<ConversationScreen> {
       ),
     );
   }
+
+  Future<void> _getImage(ImageSource source) async {
+    final pickedFile = await imagePicker.getImage(source: source);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+        print(_image);
+      } else {
+        print("No image selected");
+      }
+    });
+  }
+
+  Future<firebase_storage.UploadTask> _uploadFile() async {
+    if (_image == null) {
+      return null;
+    }
+    firebase_storage.UploadTask uploadTask;
+    firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child(path.basename(_image.path));
+    uploadTask = ref.putFile(_image);
+    return Future.value(uploadTask);
+  }
+
+  void _sendAttachment(User currentUser) {
+    socketService.socket.emit("NEW_MESSAGE", {
+      "message": "Sent a file.",
+      "messageText": "Sent a file.",
+      "createdAt": DateTime.now().toIso8601String(),
+      "conversationId": widget.conversation.id,
+      "sender": currentUser.toJson(),
+      "attachment": _attachment?.toJsonSnakeCase(), // don't ask why
+    });
+
+    _attachment = null;
+  }
 }
 
-class MessageTextBox extends StatelessWidget {
+class MessageTextBox extends StatefulWidget {
   const MessageTextBox({
     Key key,
     @required this.messageInputController,
@@ -223,6 +289,11 @@ class MessageTextBox extends StatelessWidget {
   final VoidCallback onOpenCamera;
   final VoidCallback onOpenFileUpload;
 
+  @override
+  _MessageTextBoxState createState() => _MessageTextBoxState();
+}
+
+class _MessageTextBoxState extends State<MessageTextBox> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -245,7 +316,7 @@ class MessageTextBox extends StatelessWidget {
                 borderSide: BorderSide.none,
               ),
             ),
-            controller: this.messageInputController,
+            controller: this.widget.messageInputController,
           ),
         ),
         Row(
@@ -254,21 +325,21 @@ class MessageTextBox extends StatelessWidget {
               icon: Icon(
                 Icons.file_upload,
               ),
-              onPressed: onOpenFileUpload,
+              onPressed: widget.onOpenFileUpload,
               splashRadius: 17.0,
             ),
             IconButton(
               icon: Icon(
                 Icons.camera_alt,
               ),
-              onPressed: onOpenCamera,
+              onPressed: widget.onOpenCamera,
               splashRadius: 17.0,
             ),
             Expanded(
               child: SizedBox(),
             ),
             TextButton(
-              onPressed: onSend,
+              onPressed: widget.onSend,
               child: Text("SEND"),
             ),
           ],
@@ -280,7 +351,7 @@ class MessageTextBox extends StatelessWidget {
 
 class MessageBubble extends StatelessWidget {
   final Message message;
-  final bool isMine = false;
+  final bool isMine;
 
   final CircleAvatar userAvatar = CircleAvatar(
     backgroundColor: Colors.black12,
@@ -293,6 +364,7 @@ class MessageBubble extends StatelessWidget {
   final myMessageStyle = BubbleStyle(
     nip: BubbleNip.rightBottom,
     alignment: Alignment.bottomRight,
+    color: Colors.blueAccent,
   );
 
   final otherMessageStyle = BubbleStyle(
@@ -300,10 +372,55 @@ class MessageBubble extends StatelessWidget {
     alignment: Alignment.bottomLeft,
   );
 
-  MessageBubble({this.message});
+  MessageBubble({this.message, this.isMine = false});
 
   @override
   Widget build(BuildContext context) {
+    return isMine ? _buildMyMessage() : _buildOtherMessage();
+  }
+
+  Widget _buildMyMessage() {
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            SizedBox(
+              width: 10.0,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Bubble(
+                    child: Text(
+                      message.message,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    padding: BubbleEdges.all(12.0),
+                    style: myMessageStyle,
+                  ),
+                  if (message.attachment != null) ...[
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Bubble(
+                      child: _buildAttachmentPreview(),
+                      padding: BubbleEdges.all(12.0),
+                      style: myMessageStyle,
+                    ),
+                  ]
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 10.0),
+      ],
+    );
+  }
+
+  Widget _buildOtherMessage() {
     return Column(
       children: [
         Row(
@@ -324,8 +441,13 @@ class MessageBubble extends StatelessWidget {
                   Bubble(
                     child: Text(message.message),
                     padding: BubbleEdges.all(12.0),
-                    style: isMine ? myMessageStyle : otherMessageStyle,
+                    style: otherMessageStyle,
                   ),
+                  if (message.attachment != null)
+                    Bubble(
+                      child: _buildAttachmentPreview(),
+                      padding: BubbleEdges.all(12.0),
+                    ),
                 ],
               ),
             ),
@@ -333,6 +455,20 @@ class MessageBubble extends StatelessWidget {
         ),
         SizedBox(height: 10.0),
       ],
+    );
+  }
+
+  Widget _buildAttachmentPreview() {
+    if (message.attachment.type != null) {
+      if (message.attachment.type.split("/")[0] == 'image') {
+        return Image(
+          image: NetworkImage(message.attachment?.url),
+          width: 150.0,
+        );
+      }
+    }
+    return Container(
+      child: Text("File Attached."),
     );
   }
 }

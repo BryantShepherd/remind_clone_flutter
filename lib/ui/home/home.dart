@@ -151,6 +151,7 @@ class _HomeScreenState extends State<HomeScreen>
       case 0:
         return SubmenuFab(
           icons: [Icons.sms, Icons.mail],
+          tooltips: ["Send new message", "Send email"],
           mainIcon: Icons.create,
           pressHandlers: [
             () {

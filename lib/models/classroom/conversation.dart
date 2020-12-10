@@ -1,3 +1,5 @@
+import 'package:remind_clone_flutter/models/classroom.dart';
+
 import '../user/user.dart';
 
 class Conversation {
@@ -48,15 +50,16 @@ class Message {
   String message;
   String createdAt;
   Conversation conversation;
+  ClassroomFile attachment;
 
-  Message({
-    this.id,
-    this.messageText,
-    this.sender,
-    this.message,
-    this.createdAt,
-    this.conversation,
-  });
+  Message(
+      {this.id,
+      this.messageText,
+      this.sender,
+      this.message,
+      this.createdAt,
+      this.conversation,
+      this.attachment});
 
   void setConversation(Conversation conversation) {
     this.conversation = conversation;
@@ -69,6 +72,9 @@ class Message {
       message: json["message"],
       messageText: json["messageText"] ?? json["message_text"],
       createdAt: json["createdAt"] ?? json["created_at"],
+      attachment: json["attachment"] != null
+          ? ClassroomFile.fromJson(json["attachment"])
+          : null,
     );
   }
 }
