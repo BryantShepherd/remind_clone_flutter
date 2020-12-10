@@ -3,9 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/ui/login/register.dart';
-
 import 'package:remind_clone_flutter/widgets/bezierContainer.dart';
-
 import '../../routes.dart';
 
 class LoginScreen extends StatefulWidget {
