@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_simple_dependency_injection/injector.dart';
 import 'package:provider/provider.dart';
-import 'package:remind_clone_flutter/data/network/socket_service.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/ui/login/register.dart';
@@ -68,12 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
           String email = this._emailController.text;
           String password = this._passwordController.text;
           await userStore.login(email, password);
-          await classroomStore.fetchUserClassrooms(userStore.getToken());
-          classroomStore
-              .setCurrentClassroom(classroomStore.classrooms.first.id);
-          final socketService = Injector().get<SocketService>();
-          socketService.connectWithToken(
-              socketService.socket, userStore.getToken());
           Navigator.pushNamed(
             context,
             Routes.home,

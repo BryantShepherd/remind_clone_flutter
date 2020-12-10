@@ -13,9 +13,7 @@ class UserStore with ChangeNotifier {
   UserStore() {
     _userApi = UserApi(_client);
   }
-
-  var _client = new RestClient();
-
+  
   void setUser(User user) {
     this.user = user;
   }
@@ -52,16 +50,15 @@ class UserStore with ChangeNotifier {
     prefs.remove("token");
   }
 
-  Future<User> autoLogin() async {
+  Future<bool> autoLogin() async {
     UserApi userApi = new UserApi(_client);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString("token");
-    if (token.isNotEmpty) {
+    if (token != null && token.isNotEmpty) {
       try {
         var res = await userApi.getProfle(token);
         this.setUser(res["user"] as User);
-        print(getUser().toJson());
-        return getUser();
+        return getToken() != null;
       } catch (e) {
         print(e.toString());
         throw e;
