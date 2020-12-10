@@ -39,17 +39,7 @@ class _FileTabState extends State<FileTab> {
           // TODO: show error dialog here.
           print("${snapshot.error}");
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Welcome to Files",
-                  style: Theme.of(context).textTheme.headline5,
-                ),
-                Text(
-                    "All of the files that you share to your class will be in here."),
-              ],
-            ),
+            child: Text("Fetch Failed"),
           );
         }
         return Center(

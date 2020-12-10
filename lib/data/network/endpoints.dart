@@ -25,5 +25,4 @@ class Endpoints {
   static const String joinClassroomAPI = baseUrl + "/classroom/join";
 
   static const String createClassroomAPI = baseUrl + "/classroom";
-
 }

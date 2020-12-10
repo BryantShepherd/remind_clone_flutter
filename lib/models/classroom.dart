@@ -1,4 +1,5 @@
 import 'classroom/conversation.dart';
+import 'user/user.dart';
 
 class Classroom {
   int id;
@@ -8,6 +9,7 @@ class Classroom {
   String type;
   List<ClassroomFile> files = [];
   List<Conversation> conversations;
+  List<ClassroomMember> members;
 
   Classroom({this.id, this.code, this.name, this.school, this.type});
 
@@ -28,6 +30,10 @@ class Classroom {
       throw NullThrownError();
     }
     this.conversations.add(convo);
+  }
+
+  void setMembers(List<ClassroomMember> members) {
+    this.members = members;
   }
 
   factory Classroom.fromJson(Map<String, dynamic> json) {
@@ -98,5 +104,31 @@ class ClassroomFile {
       "size": size,
       "createdAt": createdAt,
     };
+  }
+}
+
+// Should have extends User or some common interfaces
+class ClassroomMember extends User {
+  String type;
+  String joinedDate;
+
+  ClassroomMember({
+    int id,
+    String name,
+    String email,
+    String avatarUrl,
+    this.type,
+    this.joinedDate,
+  }) : super(id: id, name: name, email: email, avatarUrl: avatarUrl);
+
+  factory ClassroomMember.fromJson(Map<String, dynamic> json) {
+    return ClassroomMember(
+      id: json["id"],
+      name: json["name"],
+      email: json["email"],
+      avatarUrl: json["avatarUrl"] ?? json["avatar_url"],
+      type: json["type"],
+      joinedDate: json["joinedDate"] ?? json["joined_date"],
+    );
   }
 }
