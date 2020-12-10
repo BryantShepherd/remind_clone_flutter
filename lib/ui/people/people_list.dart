@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:remind_clone_flutter/ui/people/people_user_info.dart';
 
 class PeopleAddPrompt extends StatelessWidget {
   @override
@@ -102,7 +103,7 @@ class _PeopleListState extends State<PeopleList> {
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   Widget _buildPeopleList(ClassroomStore store) {
-    final members = store.getCurrentClassroom()?.members;
+    final members = store.getCurrentClassroom()?.members ?? [];
     var child = ListView(
       padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 10.0),
       children: [
@@ -159,6 +160,13 @@ class _PeopleListState extends State<PeopleList> {
               backgroundImage: NetworkImage(member.avatarUrl),
             ),
             title: Text(member.name),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ProfileUserInfo(member: member),
+                ),
+              );
+            },
           ),
       ],
     );

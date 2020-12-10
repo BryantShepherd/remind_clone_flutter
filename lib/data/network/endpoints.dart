@@ -1,7 +1,7 @@
 class Endpoints {
   Endpoints._();
 
-  static const String host = "http://192.168.1.35:3000";
+  static const String host = "http://192.168.1.93:3000";
 
   // base url
   static const String baseUrl = "$host/api";
