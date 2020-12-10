@@ -135,15 +135,14 @@ class _ConversationScreenState extends State<ConversationScreen> {
   Future<List<Message>> futureFetchMessages;
   final SocketService socketService = Injector().get<SocketService>();
 
-  Widget _buildMessageList(List<Message> messages, User sender) {
+  Widget _buildMessageList(List<Message> messages, User currentUser) {
     final List<MessageBubble> messageBubbles = [];
-    final userStore = Provider.of<UserStore>(context, listen: false);
 
     for (var message in messages) {
       messageBubbles.add(
         MessageBubble(
           message: message,
-          isMine: userStore.getUser().id == message.sender.id,
+          isMine: currentUser.id == message.sender.id,
         ),
       );
     }
@@ -164,7 +163,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 "messageText": messageInputController.text,
                 "createdAt": DateTime.now().toIso8601String(),
                 "conversationId": widget.conversation.id,
-                "sender": sender.toJson(),
+                "sender": currentUser.toJson(),
                 "attachment": _attachment?.toJsonSnakeCase(), // don't ask why
               });
 
@@ -185,6 +184,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                     type:
                         "image/jpeg" // because the img is taken from the camera, we can hard code the type.
                     );
+                _sendAttachment(currentUser);
               }
             },
           ),
@@ -259,6 +259,19 @@ class _ConversationScreenState extends State<ConversationScreen> {
         .child(path.basename(_image.path));
     uploadTask = ref.putFile(_image);
     return Future.value(uploadTask);
+  }
+
+  void _sendAttachment(User currentUser) {
+    socketService.socket.emit("NEW_MESSAGE", {
+      "message": "Sent a file.",
+      "messageText": "Sent a file.",
+      "createdAt": DateTime.now().toIso8601String(),
+      "conversationId": widget.conversation.id,
+      "sender": currentUser.toJson(),
+      "attachment": _attachment?.toJsonSnakeCase(), // don't ask why
+    });
+
+    _attachment = null;
   }
 }
 
