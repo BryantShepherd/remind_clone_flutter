@@ -6,6 +6,7 @@ import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/models/classroom.dart';
+import 'package:remind_clone_flutter/widgets/search_page.dart';
 import 'widgets/home_tab_message.dart';
 import 'package:provider/provider.dart';
 import 'widgets/home_tab_file.dart';
@@ -15,6 +16,8 @@ import '../people/people_list.dart';
 enum MenuActions { account, logOut }
 
 class HomeScreen extends StatefulWidget {
+  final List<String> list = List.generate(10, (index) => "Text $index"); //Truyền list để search vào đây
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -78,6 +81,7 @@ class _HomeScreenState extends State<HomeScreen>
               onPressed: () {
                 //TODO: Implement search bar
                 print("Show search bar");
+                showSearch(context: context, delegate: Search(widget.list));
               },
               //TODO: Use variables or constant instead of a 'magic number'
               splashRadius: 20.0,
