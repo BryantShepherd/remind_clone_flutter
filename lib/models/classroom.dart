@@ -83,6 +83,28 @@ class ClassroomFile {
       createdAt: json["createdAt"] ?? json["created_at"],
     );
   }
+
+  Map<String, dynamic> toJsonSnakeCase() {
+    return {
+      "id": id,
+      "name": name,
+      "url": url,
+      "type": type,
+      "size": size,
+      "created_at": createdAt,
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "url": url,
+      "name": name,
+      "type": type,
+      "size": size,
+      "createdAt": createdAt,
+    };
+  }
 }
 
 // Should have extends User or some common interfaces

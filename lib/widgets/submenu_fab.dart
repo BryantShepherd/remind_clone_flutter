@@ -6,12 +6,12 @@ class SubmenuFab extends StatefulWidget {
   final List<String> tooltips;
   final IconData mainIcon;
   final List<VoidCallback> pressHandlers;
-  SubmenuFab(
-      {@required this.icons,
-      @required this.mainIcon,
-      @required this.pressHandlers,
-      this.tooltips})
-      : assert(icons.length == pressHandlers.length);
+  SubmenuFab({
+    @required this.icons,
+    @required this.mainIcon,
+    @required this.pressHandlers,
+    @required this.tooltips,
+  }) : assert(icons.length == pressHandlers.length && icons.length == tooltips.length);
   @override
   _SubmenuFabState createState() => _SubmenuFabState();
 }
@@ -51,15 +51,18 @@ class _SubmenuFabState extends State<SubmenuFab> with TickerProviderStateMixin {
               curve: Interval(0.0, 1.0 - index / icons.length / 2.0,
                   curve: Curves.easeOut),
             ),
-            child: FloatingActionButton(
-              heroTag: null,
-              backgroundColor: Colors.white,
-              mini: true,
-              child: Icon(
-                icons[index],
-                color: Colors.blue,
+            child: Tooltip(
+              message: widget.tooltips[index],
+              child: FloatingActionButton(
+                heroTag: null,
+                backgroundColor: Colors.white,
+                mini: true,
+                child: Icon(
+                  icons[index],
+                  color: Colors.blue,
+                ),
+                onPressed: widget.pressHandlers[index],
               ),
-              onPressed: widget.pressHandlers[index],
             ),
           ),
         );

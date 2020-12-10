@@ -17,14 +17,32 @@ class ClassroomStore with ChangeNotifier {
     this.socketService.socket.on("NEW_MESSAGE", (dynamic msg) {
       int conversationId = msg["conversationId"];
       var conversation = getConversationById(conversationId);
+      if (conversation == null || conversation.messages == null) {
+        return;
+      }
       var newMessage = Message.fromJson(msg);
       newMessage.setConversation(conversation);
       addMessage(conversation, newMessage);
+    });
+
+    this.socketService.socket.on("FIRST_NEW_MESSAGE", (dynamic data) {
+      int classroomId = data["newConvo"]["classroom_id"];
+      var newConvo = Conversation.fromJson(data["newConvo"]);
+      var newMessage = Message.fromJson(data["newMsg"]);
+      newConvo.setMessages([newMessage]);
+
+      var classroom = getClassroomById(classroomId);
+
+      if (classroom == null || classroom.conversations == null) return;
+      classroom.addConversation(newConvo);
     });
   }
 
   Conversation getConversationById(int conversationId) {
     for (var classroom in classrooms) {
+      if (classroom.conversations == null) {
+        continue;
+      }
       for (var convo in classroom.conversations) {
         if (convo.id == conversationId) {
           return convo;
