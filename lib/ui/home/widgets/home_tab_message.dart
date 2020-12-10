@@ -22,7 +22,7 @@ class _MessageTabState extends State<MessageTab> {
     final classroomStore = Provider.of<ClassroomStore>(context);
     final userStore = Provider.of<UserStore>(context, listen: false);
     futureFetchConvos = classroomStore.fetchConversations(
-        userStore.getToken(), classroomStore.currentClassroom.id);
+        userStore.getToken(), classroomStore.currentClassroom?.id);
   }
 
   @override
@@ -34,7 +34,21 @@ class _MessageTabState extends State<MessageTab> {
           return _buildConvoList(snapshot.data);
         } else if (snapshot.hasError) {
           // TODO: show error dialog here.
-          return Text("${snapshot.error}");
+          print("${snapshot.error}");
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Welcome to Messages",
+                  style: Theme.of(context).textTheme.headline5,
+                ),
+                Text(
+                    "All of your conversations will appear here."),
+              ],
+            ),
+          );
+
         }
         return Center(
           child: CircularProgressIndicator(),
@@ -159,7 +173,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
       Provider.of<ClassroomStore>(
         context,
         listen: false,
-      )..fetchMessages(
+      ).fetchMessages(
           userStore.getToken(),
           widget.conversation,
         );

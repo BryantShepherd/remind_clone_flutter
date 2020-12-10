@@ -1,7 +1,7 @@
 class Endpoints {
   Endpoints._();
 
-  static const String host = "http://localhost:3000";
+  static const String host = "http://192.168.1.93:3000";
 
   // base url
   static const String baseUrl = "$host/api";
@@ -12,7 +12,17 @@ class Endpoints {
   // connectTimeout
   static const int connectionTimeout = 3000;
 
+  // user routes
   static const String loginAPI = baseUrl + "/user/auth/login";
 
+  static const String registerApi = baseUrl + "/user/auth/register";
+
+  static const String getProfile = baseUrl + "/user/profile";
+
+  // classroom routes
   static const String getUserClassroomsAPI = baseUrl + "/classroom/my-class";
+
+  static const String joinClassroomAPI = baseUrl + "/classroom/join";
+
+  static const String createClassroomAPI = baseUrl + "/classroom";
 }

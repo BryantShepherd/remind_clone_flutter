@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_simple_dependency_injection/injector.dart';
+import 'package:remind_clone_flutter/data/network/socket_service.dart';
 import 'package:remind_clone_flutter/ui/class/class_create.dart';
+import 'package:remind_clone_flutter/ui/class/class_join.dart';
 import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
 import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
@@ -43,6 +46,16 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: tabs.length, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
+        final userStore = Provider.of<UserStore>(context, listen: false);
+        await classroomStore.fetchUserClassrooms(userStore.getToken());
+        classroomStore
+            .setCurrentClassroom(classroomStore.classrooms.first.id);
+        final socketService = Injector().get<SocketService>();
+        socketService.connectWithToken(
+            socketService.socket, userStore.getToken());
+      });
   }
 
   @override
@@ -59,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen>
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(classroomStore.currentClassroom.name),
+          title: Text(classroomStore.currentClassroom != null? classroomStore.currentClassroom.name : ""),
           bottom: TabBar(
             controller: this._tabController,
             isScrollable: true,
@@ -87,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen>
               splashRadius: 20.0,
             ),
             PopupMenuButton<MenuActions>(
-              onSelected: (result) {
+              onSelected: (result) async {
                 switch (result) {
                   case MenuActions.account:
                     {
@@ -97,9 +110,9 @@ class _HomeScreenState extends State<HomeScreen>
                     break;
                   case MenuActions.logOut:
                     {
-                      Navigator.pop(context);
-                      userStore.resetUser();
+                      await userStore.resetUser();
                       classroomStore.resetClassrooms();
+                      Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
                     }
                     break;
                 }
@@ -175,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen>
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => ClassCreate(),
+              builder: (context) => ClassJoin(),
             ),
           );
         },

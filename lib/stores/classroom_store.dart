@@ -70,6 +70,7 @@ class ClassroomStore with ChangeNotifier {
 
   void resetClassrooms() {
     classrooms = [];
+    currentClassroom = null;
   }
 
   Future<List<ClassroomFile>> fetchClassroomFiles(
@@ -153,6 +154,33 @@ class ClassroomStore with ChangeNotifier {
       return conversation.messages;
     } catch (e) {
       print(e);
+      throw e;
+    }
+  }
+
+  Future<List<ClassroomMember>> fetchClassroomMembers(
+      String token, Classroom classroom,
+      {bool forced = false}) async {
+    try {
+      if (classroom.members != null && !forced) {
+        return classroom.members;
+      }
+
+      var classroomApi = ClassroomApi(_client);
+      var memberObjs = await classroomApi.getClassroomMembers(
+          token, classroom.id?.toString());
+
+      var newMembers = List<ClassroomMember>();
+
+      for (var memberObj in memberObjs) {
+        newMembers.add(ClassroomMember.fromJson(memberObj));
+      }
+
+      classroom.setMembers(newMembers);
+      notifyListeners();
+
+      return classroom.members;
+    } catch (e) {
       throw e;
     }
   }

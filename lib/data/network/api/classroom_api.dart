@@ -65,4 +65,40 @@ class ClassroomApi {
       throw e;
     }
   }
+
+  Future<void> joinClassroom(String token, String code) async {
+    try {
+      var requestUrl = Endpoints.joinClassroomAPI;
+      await _client.postWithBearerToken("$requestUrl/$code", token, null);
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  Future<void> createClassroom(String token, String name, String school) async {
+    try {
+      final requestBody = {"name": name, "school": school};
+      var requestUrl = Endpoints.createClassroomAPI;
+      await _client.postWithBearerToken(requestUrl, token, requestBody);
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  Future<List<dynamic>> getClassroomMembers(
+    String token,
+    String classroomId,
+  ) async {
+    try {
+      var requestUrl = Endpoints.baseUrl + "/classroom/$classroomId/members";
+      var res = await _client.getWithBearerToken(requestUrl, token);
+
+      return res['data'];
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
 }
