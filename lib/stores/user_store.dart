@@ -54,7 +54,7 @@ class UserStore with ChangeNotifier {
     UserApi userApi = new UserApi(_client);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString("token");
-    if (token.isNotEmpty) {
+    if (token != null && token.isNotEmpty) {
       try {
         var res = await userApi.getProfle(token);
         this.setUser(res["user"] as User);
