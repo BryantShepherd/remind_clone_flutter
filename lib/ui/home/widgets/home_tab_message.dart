@@ -117,6 +117,7 @@ class _ConversationListTile extends StatelessWidget {
 }
 
 class ConversationScreen extends StatefulWidget {
+  static const routeName = "/conversation";
   final Conversation conversation;
 
   ConversationScreen(this.conversation);

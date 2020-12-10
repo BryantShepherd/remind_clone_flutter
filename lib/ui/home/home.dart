@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_simple_dependency_injection/injector.dart';
 import 'package:remind_clone_flutter/data/network/socket_service.dart';
+import 'package:remind_clone_flutter/models/classroom/conversation.dart';
 import 'package:remind_clone_flutter/ui/class/class_create.dart';
 import 'package:remind_clone_flutter/ui/class/class_join.dart';
 import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
@@ -9,6 +10,7 @@ import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/models/classroom.dart';
+import 'package:remind_clone_flutter/widgets/search_page.dart';
 import 'widgets/home_tab_message.dart';
 import 'package:provider/provider.dart';
 import 'widgets/home_tab_file.dart';
@@ -44,15 +46,15 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     _tabController = TabController(length: tabs.length, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
-        final userStore = Provider.of<UserStore>(context, listen: false);
-        await classroomStore.fetchUserClassrooms(userStore.getToken());
-        classroomStore
-            .setCurrentClassroom(classroomStore.classrooms.first.id);
-        final socketService = Injector().get<SocketService>();
-        socketService.connectWithToken(
-            socketService.socket, userStore.getToken());
-      });
+      final classroomStore =
+          Provider.of<ClassroomStore>(context, listen: false);
+      final userStore = Provider.of<UserStore>(context, listen: false);
+      await classroomStore.fetchUserClassrooms(userStore.getToken());
+      classroomStore.setCurrentClassroom(classroomStore.classrooms.first.id);
+      final socketService = Injector().get<SocketService>();
+      socketService.connectWithToken(
+          socketService.socket, userStore.getToken());
+    });
   }
 
   @override
@@ -69,7 +71,9 @@ class _HomeScreenState extends State<HomeScreen>
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(classroomStore.currentClassroom != null? classroomStore.currentClassroom.name : ""),
+          title: Text(classroomStore.currentClassroom != null
+              ? classroomStore.currentClassroom.name
+              : ""),
           bottom: TabBar(
             controller: this._tabController,
             isScrollable: true,
@@ -88,9 +92,35 @@ class _HomeScreenState extends State<HomeScreen>
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.search),
-              onPressed: () {
-                //TODO: Implement search bar
-                print("Show search bar");
+              onPressed: () async {
+                switch (_selectedTabIndex) {
+                  case 0:
+                    final conversations =
+                        await classroomStore.fetchConversations(
+                            userStore.getToken(),
+                            classroomStore.currentClassroom.id);
+
+                    final convoNames =
+                        conversations.map((c) => c.name).toList() ?? [];
+
+                    showSearch(
+                      context: context,
+                      delegate: Search(
+                        convoNames,
+                        conversations,
+                        (context, selectedValue) {
+                          var selectedConvo = selectedValue as Conversation;
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ConversationScreen(selectedConvo),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                    break;
+                }
               },
               //TODO: Use variables or constant instead of a 'magic number'
               splashRadius: 20.0,
@@ -108,7 +138,8 @@ class _HomeScreenState extends State<HomeScreen>
                     {
                       await userStore.resetUser();
                       classroomStore.resetClassrooms();
-                      Navigator.pushNamedAndRemoveUntil(context, "/", (route) => false);
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, "/", (route) => false);
                     }
                     break;
                 }

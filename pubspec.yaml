@@ -42,6 +42,8 @@ dependencies:
   path_provider: ^1.6.24
   pull_to_refresh: ^1.6.3
 
+  flutter_search_bar: ^2.1.0
+
   google_fonts: ^1.1.1
   
   # The following adds the Cupertino Icons font to your application.
