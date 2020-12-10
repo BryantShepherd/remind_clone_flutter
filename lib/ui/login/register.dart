@@ -150,9 +150,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             onChanged: (int value) {
               setState(() {
                 _selectedRoleId = value;
-                print(_selectedRoleId);
               });
-            })
+            },
+            isExpanded: true,)
       ],
     );
   }
