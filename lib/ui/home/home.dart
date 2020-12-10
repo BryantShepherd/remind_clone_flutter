@@ -93,23 +93,34 @@ class _HomeScreenState extends State<HomeScreen>
             IconButton(
               icon: Icon(Icons.search),
               onPressed: () async {
-                final conversations = await classroomStore.fetchConversations(
-                    userStore.getToken(), classroomStore.currentClassroom.id);
+                switch (_selectedTabIndex) {
+                  case 0:
+                    final conversations =
+                        await classroomStore.fetchConversations(
+                            userStore.getToken(),
+                            classroomStore.currentClassroom.id);
 
-                final convoNames =
-                    conversations.map((c) => c.name).toList() ?? [];
-                showSearch(
-                    context: context,
-                    delegate: Search(convoNames, conversations,
+                    final convoNames =
+                        conversations.map((c) => c.name).toList() ?? [];
+
+                    showSearch(
+                      context: context,
+                      delegate: Search(
+                        convoNames,
+                        conversations,
                         (context, selectedValue) {
-                      var selectedConvo = selectedValue as Conversation;
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ConversationScreen(selectedConvo),
-                        ),
-                      );
-                    }));
+                          var selectedConvo = selectedValue as Conversation;
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ConversationScreen(selectedConvo),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                    break;
+                }
               },
               //TODO: Use variables or constant instead of a 'magic number'
               splashRadius: 20.0,
