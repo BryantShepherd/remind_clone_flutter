@@ -137,11 +137,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
 
   Widget _buildMessageList(List<Message> messages, User sender) {
     final List<MessageBubble> messageBubbles = [];
+    final userStore = Provider.of<UserStore>(context, listen: false);
 
     for (var message in messages) {
       messageBubbles.add(
         MessageBubble(
           message: message,
+          isMine: userStore.getUser().id == message.sender.id,
         ),
       );
     }
@@ -260,7 +262,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   }
 }
 
-class MessageTextBox extends StatelessWidget {
+class MessageTextBox extends StatefulWidget {
   const MessageTextBox({
     Key key,
     @required this.messageInputController,
@@ -274,6 +276,11 @@ class MessageTextBox extends StatelessWidget {
   final VoidCallback onOpenCamera;
   final VoidCallback onOpenFileUpload;
 
+  @override
+  _MessageTextBoxState createState() => _MessageTextBoxState();
+}
+
+class _MessageTextBoxState extends State<MessageTextBox> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -296,7 +303,7 @@ class MessageTextBox extends StatelessWidget {
                 borderSide: BorderSide.none,
               ),
             ),
-            controller: this.messageInputController,
+            controller: this.widget.messageInputController,
           ),
         ),
         Row(
@@ -305,21 +312,21 @@ class MessageTextBox extends StatelessWidget {
               icon: Icon(
                 Icons.file_upload,
               ),
-              onPressed: onOpenFileUpload,
+              onPressed: widget.onOpenFileUpload,
               splashRadius: 17.0,
             ),
             IconButton(
               icon: Icon(
                 Icons.camera_alt,
               ),
-              onPressed: onOpenCamera,
+              onPressed: widget.onOpenCamera,
               splashRadius: 17.0,
             ),
             Expanded(
               child: SizedBox(),
             ),
             TextButton(
-              onPressed: onSend,
+              onPressed: widget.onSend,
               child: Text("SEND"),
             ),
           ],
@@ -331,7 +338,7 @@ class MessageTextBox extends StatelessWidget {
 
 class MessageBubble extends StatelessWidget {
   final Message message;
-  final bool isMine = false;
+  final bool isMine;
 
   final CircleAvatar userAvatar = CircleAvatar(
     backgroundColor: Colors.black12,
@@ -344,6 +351,7 @@ class MessageBubble extends StatelessWidget {
   final myMessageStyle = BubbleStyle(
     nip: BubbleNip.rightBottom,
     alignment: Alignment.bottomRight,
+    color: Colors.blueAccent,
   );
 
   final otherMessageStyle = BubbleStyle(
@@ -351,10 +359,55 @@ class MessageBubble extends StatelessWidget {
     alignment: Alignment.bottomLeft,
   );
 
-  MessageBubble({this.message});
+  MessageBubble({this.message, this.isMine = false});
 
   @override
   Widget build(BuildContext context) {
+    return isMine ? _buildMyMessage() : _buildOtherMessage();
+  }
+
+  Widget _buildMyMessage() {
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            SizedBox(
+              width: 10.0,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Bubble(
+                    child: Text(
+                      message.message,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    padding: BubbleEdges.all(12.0),
+                    style: myMessageStyle,
+                  ),
+                  if (message.attachment != null) ...[
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Bubble(
+                      child: _buildAttachmentPreview(),
+                      padding: BubbleEdges.all(12.0),
+                      style: myMessageStyle,
+                    ),
+                  ]
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 10.0),
+      ],
+    );
+  }
+
+  Widget _buildOtherMessage() {
     return Column(
       children: [
         Row(
@@ -375,7 +428,7 @@ class MessageBubble extends StatelessWidget {
                   Bubble(
                     child: Text(message.message),
                     padding: BubbleEdges.all(12.0),
-                    style: isMine ? myMessageStyle : otherMessageStyle,
+                    style: otherMessageStyle,
                   ),
                   if (message.attachment != null)
                     Bubble(
