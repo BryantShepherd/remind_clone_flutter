@@ -24,6 +24,7 @@ class Search extends SearchDelegate {
   }
 
   String selectedResult = "";
+  dynamic selectedValue;
 
   @override
   Widget buildResults(BuildContext context) {
@@ -34,20 +35,29 @@ class Search extends SearchDelegate {
     );
   }
 
-  final List<String> listExample;
-  Search(this.listExample);
+  final List<String> listText;
+  final List<dynamic> listValue;
+  final Function(BuildContext context, dynamic selectedValue) onSelectResult;
+  Search(this.listText, this.listValue, this.onSelectResult);
 
-  List<String> recentList = ["Recent 1", "Recent 2"];
+  List<String> recentList = [];
 
   @override
   Widget buildSuggestions(BuildContext context) {
     List<String> suggestionList = [];
-    query.isEmpty
-        ? suggestionList = recentList //In the true case
-        : suggestionList.addAll(listExample.where(
-      // In the false case
-          (element) => element.contains(query),
-    ));
+    List<dynamic> suggestionListValue = [];
+    if (query.isEmpty) {
+      suggestionList = recentList;
+    } else {
+      for (int i = 0; i < listText.length; i++) {
+        var textElem = listText[i];
+        var valueElem = listValue[i];
+        if (textElem.toLowerCase().contains(query.toLowerCase())) {
+          suggestionList.add(textElem);
+          suggestionListValue.add(valueElem);
+        }
+      }
+    }
 
     return ListView.builder(
       itemCount: suggestionList.length,
@@ -57,9 +67,10 @@ class Search extends SearchDelegate {
             suggestionList[index],
           ),
           leading: query.isEmpty ? Icon(Icons.access_time) : SizedBox(),
-          onTap: (){
+          onTap: () {
             selectedResult = suggestionList[index];
-            showResults(context);
+            // showResults(context);
+            onSelectResult(context, suggestionListValue[index]);
           },
         );
       },

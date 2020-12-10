@@ -43,12 +43,10 @@ class _MessageTabState extends State<MessageTab> {
                   "Welcome to Messages",
                   style: Theme.of(context).textTheme.headline5,
                 ),
-                Text(
-                    "All of your conversations will appear here."),
+                Text("All of your conversations will appear here."),
               ],
             ),
           );
-
         }
         return Center(
           child: CircularProgressIndicator(),
@@ -74,8 +72,7 @@ class _MessageTabState extends State<MessageTab> {
               "Welcome to Messages",
               style: Theme.of(context).textTheme.headline5,
             ),
-            Text(
-                "All of your conversations will appear here."),
+            Text("All of your conversations will appear here."),
           ],
         ),
       );
@@ -114,6 +111,7 @@ class _ConversationListTile extends StatelessWidget {
 }
 
 class ConversationScreen extends StatefulWidget {
+  static const routeName = "/conversation";
   final Conversation conversation;
 
   ConversationScreen(this.conversation);
@@ -174,9 +172,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
         context,
         listen: false,
       ).fetchMessages(
-          userStore.getToken(),
-          widget.conversation,
-        );
+        userStore.getToken(),
+        widget.conversation,
+      );
     });
   }
 
