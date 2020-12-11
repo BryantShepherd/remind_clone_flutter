@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:remind_clone_flutter/models/classroom.dart';
+
 import '../rest_client.dart';
 import '../endpoints.dart';
 import '../network_exceptions.dart';
@@ -96,6 +100,22 @@ class ClassroomApi {
       var res = await _client.getWithBearerToken(requestUrl, token);
 
       return res['data'];
+    } catch (e) {
+      print(e);
+      throw e;
+    }
+  }
+
+  Future<Classroom> editClassroom(String token, Classroom classroom) async {
+    try {
+      var reqUrl = Endpoints.baseUrl + "/classroom/${classroom.id}";
+      var res = await _client
+          .post(reqUrl, body: jsonEncode((classroom.toJson())), headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json; charset=UTF-8",
+      });
+      var newClassroom = Classroom.fromJson(res["data"]);
+      return newClassroom;
     } catch (e) {
       print(e);
       throw e;

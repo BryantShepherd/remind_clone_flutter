@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:remind_clone_flutter/data/network/api/classroom_api.dart';
+import 'package:remind_clone_flutter/data/network/rest_client.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
+import 'package:remind_clone_flutter/stores/user_store.dart';
+import 'package:remind_clone_flutter/ui/people/people_user_info.dart';
 
 class SettingsTab extends StatefulWidget {
   @override
@@ -15,11 +19,15 @@ class _SettingsTabState extends State<SettingsTab> {
   @override
   Widget build(BuildContext context) {
     final classroomStore = Provider.of<ClassroomStore>(context);
+    final userStore = Provider.of<UserStore>(context);
+
 
     _nameController.text = classroomStore.getCurrentClassroom()?.name;
     _codeController.text = classroomStore.getCurrentClassroom()?.code;
     _schoolController.text = classroomStore.getCurrentClassroom()?.school;
 
+    final _client = RestClient();
+    final _classroomApi = ClassroomApi(_client);
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
@@ -38,7 +46,7 @@ class _SettingsTabState extends State<SettingsTab> {
                 color: Colors.black87,
               ),
         ),
-        TextFormField(
+        TextField(
           decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(
@@ -48,6 +56,12 @@ class _SettingsTabState extends State<SettingsTab> {
               hintText: 'Class name'),
           onChanged: (text) {},
           controller: _nameController,
+          onSubmitted: (string) async {
+            var currentClassroom = classroomStore.getCurrentClassroom();
+            currentClassroom.name = string;
+            await _classroomApi.editClassroom(userStore.getToken(), currentClassroom);
+            classroomStore.setCurrentClassroom(currentClassroom.id);
+          },
         ),
         Padding(padding: const EdgeInsets.all(5.0)),
         Text(
@@ -57,7 +71,7 @@ class _SettingsTabState extends State<SettingsTab> {
                 color: Colors.black87,
               ),
         ),
-        TextFormField(
+        TextField(
           decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(
@@ -67,6 +81,7 @@ class _SettingsTabState extends State<SettingsTab> {
               hintText: 'Class code'),
           onChanged: (text) {},
           controller: _codeController,
+          enabled: false,
         ),
         Padding(padding: const EdgeInsets.all(5.0)),
         Text(
@@ -76,7 +91,7 @@ class _SettingsTabState extends State<SettingsTab> {
                 color: Colors.black87,
               ),
         ),
-        TextFormField(
+        TextField(
           decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(
@@ -86,6 +101,12 @@ class _SettingsTabState extends State<SettingsTab> {
               hintText: 'School name'),
           onChanged: (text) {},
           controller: _schoolController,
+          onSubmitted: (string) async {
+            var currentClassroom = classroomStore.getCurrentClassroom();
+            currentClassroom.school = string;
+            await _classroomApi.editClassroom(userStore.getToken(), currentClassroom);
+            classroomStore.setCurrentClassroom(currentClassroom.id);
+          },
         ),
         Padding(padding: const EdgeInsets.all(10.0)),
         ListTile(
@@ -123,7 +144,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     ),
                   ),
                   Icon(
-                    Icons.arrow_forward_ios,
+                    Icons.arrow_forward,
                     color: Colors.blue,
                   )
                 ],
@@ -179,46 +200,69 @@ class _SettingsTabState extends State<SettingsTab> {
 }
 
 class ClassOwner extends StatelessWidget {
-  final List<Map<String, dynamic>> _owner = [
-    {"name": "Haipro"},
-    {"name": "Tuna Ahn"},
-  ];
 
   @override
   Widget build(BuildContext context) {
+    final classroomStore = Provider.of<ClassroomStore>(context, listen: false);
+    final userStore = Provider.of<UserStore>(context, listen: false);
+
     return SizedBox(
       height: 180.0,
-      child: ListView(
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        restorationId: 'list_demo_list_view',
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        children: [
-          ListTile(
-            leading: ExcludeSemantics(
-              child: CircleAvatar(
-                child: Icon(
-                  Icons.add_circle,
-                  size: 40.0,
+      child: FutureBuilder(
+        future: classroomStore.fetchClassroomMembers(
+            userStore.getToken(), classroomStore.getCurrentClassroom()),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              restorationId: 'list_demo_list_view',
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                ListTile(
+                  leading: ExcludeSemantics(
+                    child: CircleAvatar(
+                      child: Icon(
+                        Icons.add_circle,
+                        size: 40.0,
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    "Add Owner",
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                  onTap: () {},
                 ),
-              ),
-            ),
-            title: Text(
-              "Add Owner",
-              style: TextStyle(color: Colors.blue),
-            ),
-            onTap: () {},
-          ),
-          for (int i = 0; i < _owner.length; i++)
-            ListTile(
-              leading: ExcludeSemantics(
-                child: CircleAvatar(
-                  child: Text('${i + 1}'),
-                ),
-              ),
-              title: Text(_owner[i]["name"]),
-            ),
-        ],
+                for (var member in snapshot.data)
+                  if (member.type == "Owner")
+                  ListTile(
+                    leading: ExcludeSemantics(
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(member.avatarUrl),
+                      ),
+                    ),
+                    title: Text("${member.name}"),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ProfileUserInfo(member: member),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            );
+          } else if (snapshot.hasError) {
+            print("${snapshot.error}");
+            return Center(
+              child: Text("Fetch Failed"),
+            );;
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       ),
     );
   }

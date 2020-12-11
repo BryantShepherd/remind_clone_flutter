@@ -5,6 +5,7 @@ import 'package:remind_clone_flutter/data/network/socket_service.dart';
 import 'package:remind_clone_flutter/models/classroom/conversation.dart';
 import 'package:remind_clone_flutter/ui/class/class_create.dart';
 import 'package:remind_clone_flutter/ui/class/class_join.dart';
+import 'package:remind_clone_flutter/ui/home/message/create_convesation.dart';
 import 'package:remind_clone_flutter/ui/home/widgets/home_tab_settings.dart';
 import 'package:remind_clone_flutter/ui/user/user_settings.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
@@ -151,9 +152,6 @@ class _HomeScreenState extends State<HomeScreen>
                     child: Text("Account settings"),
                   ),
                   const PopupMenuItem(
-                    child: Text("Select me!"),
-                  ),
-                  const PopupMenuItem(
                     value: MenuActions.logOut,
                     child: Text("Log out!"),
                   ),
@@ -177,15 +175,21 @@ class _HomeScreenState extends State<HomeScreen>
     switch (this._selectedTabIndex) {
       case 0:
         return SubmenuFab(
-          icons: [Icons.sms, Icons.mail],
+          icons: [Icons.sms, Icons.group],
           tooltips: ["Send new message", "Send email"],
           mainIcon: Icons.create,
           pressHandlers: [
             () {
-              print("hello");
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => IndividualConversation()));
             },
             () {
-              print("hi me");
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => GroupConversation()));
             },
           ],
         );

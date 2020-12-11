@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:firebase_core/firebase_core.dart';
+
 import '../rest_client.dart';
 import 'package:remind_clone_flutter/models/user/user.dart';
 import '../endpoints.dart';

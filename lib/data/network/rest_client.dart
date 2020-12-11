@@ -58,7 +58,7 @@ class RestClient {
     );
   }
 
-  Future<dynamic> postWithBearerToken(String url, String token, Map<String, String> body) {
+  Future<dynamic> postWithBearerToken(String url, String token, dynamic body) {
     return post(
       url,
       headers: {"Authorization": "Bearer $token"},

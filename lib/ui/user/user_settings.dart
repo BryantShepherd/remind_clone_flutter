@@ -55,9 +55,8 @@ class UserSettings extends StatelessWidget {
         "icon": Icons.logout,
         "function": () async {
           {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => LoginScreen())
-            );
+            Navigator.pushNamedAndRemoveUntil(
+                context, "/", (route) => false);
             await userStore.resetUser();
             classroomStore.resetClassrooms();
           }
