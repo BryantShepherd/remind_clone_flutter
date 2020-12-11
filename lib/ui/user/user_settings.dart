@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:remind_clone_flutter/stores/classroom_store.dart';
 import 'package:remind_clone_flutter/stores/user_store.dart';
 import 'package:remind_clone_flutter/ui/login/login.dart';
+import 'package:remind_clone_flutter/ui/user/widgets/account.dart';
 
 class UserSettings extends StatelessWidget {
   @override
@@ -16,7 +17,7 @@ class UserSettings extends StatelessWidget {
         "icon": Icons.account_circle,
         "function": () {
           Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => null)
+              MaterialPageRoute(builder: (context) => UserInfo())
           );
         },
       },
